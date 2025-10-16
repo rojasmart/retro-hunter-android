@@ -1,6 +1,6 @@
 import React, { useState, useRef } from "react";
 import { View, Text, TouchableOpacity, StyleSheet, Alert } from "react-native";
-import { Camera, CameraType } from "expo-camera";
+import { CameraView, CameraType, useCameraPermissions } from "expo-camera";
 import * as ImagePicker from "expo-image-picker";
 
 interface CameraCaptureProps {
@@ -9,10 +9,10 @@ interface CameraCaptureProps {
 }
 
 export default function CameraCapture({ onImageCaptured, isProcessing }: CameraCaptureProps) {
-  const [type, setType] = useState(CameraType.back);
-  const [permission, requestPermission] = Camera.useCameraPermissions();
+  const [facing, setFacing] = useState<CameraType>("back");
+  const [permission, requestPermission] = useCameraPermissions();
   const [showCamera, setShowCamera] = useState(false);
-  const cameraRef = useRef < Camera > null;
+  const cameraRef = useRef<CameraView>(null);
 
   if (!permission) {
     return <View />;
@@ -34,7 +34,6 @@ export default function CameraCapture({ onImageCaptured, isProcessing }: CameraC
       try {
         const photo = await cameraRef.current.takePictureAsync({
           quality: 0.8,
-          base64: true,
         });
         setShowCamera(false);
         onImageCaptured(photo.uri);
@@ -57,10 +56,14 @@ export default function CameraCapture({ onImageCaptured, isProcessing }: CameraC
     }
   };
 
+  function toggleCameraFacing() {
+    setFacing((current) => (current === "back" ? "front" : "back"));
+  }
+
   if (showCamera) {
     return (
       <View style={styles.cameraContainer}>
-        <Camera style={styles.camera} type={type} ref={cameraRef}>
+        <CameraView style={styles.camera} facing={facing} ref={cameraRef}>
           <View style={styles.cameraOverlay}>
             <Text style={styles.cameraInstructions}>📸 Point camera at game cover or cartridge</Text>
             <View style={styles.cameraButtonContainer}>
@@ -72,12 +75,12 @@ export default function CameraCapture({ onImageCaptured, isProcessing }: CameraC
                   <Text style={styles.captureButtonText}>{isProcessing ? "🔍" : "📷"}</Text>
                 </View>
               </TouchableOpacity>
-              <TouchableOpacity style={styles.flipButton} onPress={() => setType(type === CameraType.back ? CameraType.front : CameraType.back)}>
+              <TouchableOpacity style={styles.flipButton} onPress={toggleCameraFacing}>
                 <Text style={styles.buttonText}>🔄</Text>
               </TouchableOpacity>
             </View>
           </View>
-        </Camera>
+        </CameraView>
       </View>
     );
   }
