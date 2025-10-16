@@ -65,7 +65,7 @@ export default function CameraCapture({ onImageCaptured, isProcessing }: CameraC
       <View style={styles.cameraContainer}>
         <CameraView style={styles.camera} facing={facing} ref={cameraRef}>
           <View style={styles.cameraOverlay}>
-            <Text style={styles.cameraInstructions}>📸 Point camera at game cover or cartridge</Text>
+            <Text style={styles.cameraInstructions}>Point camera at game cover or cartridge</Text>
             <View style={styles.cameraButtonContainer}>
               <TouchableOpacity style={styles.closeButton} onPress={() => setShowCamera(false)}>
                 <Text style={styles.buttonText}>✕</Text>
@@ -88,11 +88,11 @@ export default function CameraCapture({ onImageCaptured, isProcessing }: CameraC
   return (
     <View style={styles.container}>
       <TouchableOpacity style={[styles.actionButton, styles.cameraButton]} onPress={() => setShowCamera(true)} disabled={isProcessing}>
-        <Text style={styles.actionButtonText}>{isProcessing ? "🔍 SCANNING..." : "📷 SCAN GAME COVER"}</Text>
+        <Text style={styles.actionButtonText}>{isProcessing ? "SCANNING..." : "SCAN GAME COVER"}</Text>
       </TouchableOpacity>
 
       <TouchableOpacity style={[styles.actionButton, styles.galleryButton]} onPress={pickImage} disabled={isProcessing}>
-        <Text style={styles.actionButtonText}>📁 CHOOSE FROM GALLERY</Text>
+        <Text style={styles.actionButtonText}>CHOOSE FROM GALLERY</Text>
       </TouchableOpacity>
     </View>
   );

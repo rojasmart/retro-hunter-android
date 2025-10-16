@@ -194,10 +194,10 @@ export default function App() {
             </View>
             <View style={styles.headerButtons}>
               <TouchableOpacity style={styles.headerButton}>
-                <Text style={styles.headerButtonText}>My Collection</Text>
+                <Text style={styles.headerButtonText}>Collection</Text>
               </TouchableOpacity>
               <TouchableOpacity style={styles.headerButton}>
-                <Text style={styles.headerButtonText}>My Account</Text>
+                <Text style={styles.headerButtonText}>Account</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -297,20 +297,22 @@ const styles = StyleSheet.create({
     borderBottomColor: "#374151",
   },
   headerLeft: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 16,
+    flexDirection: "column",
+    alignItems: "flex-start",
+    justifyContent: "center",
   },
   logo: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: "#10b981", // green-400
+    fontSize: 22,
+    fontWeight: "800",
+    color: "#10b981",
     fontFamily: "monospace",
+    marginTop: 6,
   },
   tagline: {
-    fontSize: 12,
-    color: "#67e8f9", // cyan-300
+    fontSize: 11,
+    color: "#9ae6ff",
     fontFamily: "monospace",
+    lineHeight: 14,
   },
   headerButtons: {
     flexDirection: "row",
