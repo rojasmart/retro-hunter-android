@@ -103,7 +103,7 @@ export default function App() {
 
     try {
       const params = new URLSearchParams({
-        nome: finalSearchName,
+        game_name: finalSearchName,
         platform: platformToSend,
         condition: condition,
       });
