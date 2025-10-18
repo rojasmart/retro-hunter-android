@@ -84,6 +84,10 @@ export default function App() {
   const [currency, setCurrency] = useState<"USD" | "EUR">("USD");
   const [exchangeRate, setExchangeRate] = useState(0.86);
 
+  useEffect(() => {
+    console.log("API_BASE_URL:", API_BASE_URL);
+  }, []);
+
   // Update min/max when results change
   useEffect(() => {
     setMinPrice(lowestPrice);
@@ -103,9 +107,15 @@ export default function App() {
         condition: condition,
       });
 
-      // Replace with your deployed webapp URL
-      const res = await fetch(`${API_BASE_URL}/api/ebay?${params.toString()}`);
+      // Debug: build and log the full URL before fetching
+      const url = `${API_BASE_URL}/api/ebay?${params.toString()}`;
+      console.log("[SEARCH] fetching:", url);
+
+      const res = await fetch(url);
+      console.log("[SEARCH] status:", res.status);
       const data = await res.json();
+      console.log("[SEARCH] data:", data);
+
       setResultados(data.resultados || []);
     } catch (error) {
       console.error("Search failed:", error);
@@ -118,20 +128,52 @@ export default function App() {
   const handleImageCaptured = async (imageUri: string) => {
     setLoading(true);
     try {
+      // Ensure proper file:// prefix for Android
+      let localUri = imageUri;
+      if (!localUri.startsWith("file://")) {
+        localUri = "file://" + localUri;
+      }
+
       const formData = new FormData();
-      formData.append("image", {
-        uri: imageUri,
+
+      // Use the React Native way to append files to FormData
+      formData.append("file", {
+        uri: localUri,
         type: "image/jpeg",
         name: "game_image.jpg",
       } as any);
 
-      // Replace with your deployed webapp URL
-      const response = await fetch(`${API_BASE_URL}/api/ocr`, { method: "POST", body: formData });
+      // Add the prompt parameter that your backend expects
+      formData.append("prompt", "return the name and platform of this game with comma separated");
 
-      const data = await response.json();
+      // Use the correct endpoint from your backend
+      const ocrUrl = `${API_BASE_URL}/ask-agent-image`;
+      console.log("[OCR] posting to:", ocrUrl, "imageUri:", imageUri);
 
-      if (data.titles && data.titles.length > 0) {
-        const gameName = data.titles[0];
+      const ocrResponse = await fetch(ocrUrl, {
+        method: "POST",
+        body: formData,
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
+      console.log("[OCR] status:", ocrResponse.status);
+
+      if (!ocrResponse.ok) {
+        const errorText = await ocrResponse.text();
+        console.log("[OCR] error response:", errorText);
+        const message = `Server returned ${ocrResponse.status}`;
+        Alert.alert("Server Error", message);
+        return;
+      }
+
+      const data = await ocrResponse.json();
+      console.log("[OCR] data:", data);
+
+      // Adapt to your backend's response format
+      if (data.titulo && data.titulo.trim()) {
+        const gameName = data.titulo;
         const detectedPlatform = data.plataforma;
 
         setNome(gameName);
@@ -141,6 +183,10 @@ export default function App() {
         }
 
         searchEbayOnly(gameName, detectedPlatform);
+      } else if (data.raw) {
+        // Fallback: try to parse the raw response
+        const message = "Raw result: " + data.raw;
+        Alert.alert("Partial Detection", message);
       } else {
         Alert.alert("No Game Detected", "Could not identify any game in the image. Try a clearer photo.");
       }
