@@ -1,5 +1,18 @@
 import React, { useState, useEffect } from "react";
-import { StyleSheet, View, StatusBar, Text, TextInput, TouchableOpacity, ScrollView, FlatList, Image, Linking, Alert } from "react-native";
+import {
+  StyleSheet,
+  View,
+  StatusBar,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  ScrollView,
+  FlatList,
+  Image,
+  Linking,
+  Alert,
+  ActivityIndicator,
+} from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import CameraCapture from "./components/CameraCapture";
@@ -279,13 +292,27 @@ export default function App() {
             <View style={styles.searchSection}>
               <CameraCapture onImageCaptured={handleImageCaptured} isProcessing={loading} />
 
-              <TextInput
-                style={styles.input}
-                value={nome}
-                onChangeText={setNome}
-                placeholder="Enter the game name (e.g., Action Fighter)"
-                placeholderTextColor="#67e8f9"
-              />
+              <View style={styles.inputContainer}>
+                <TextInput
+                  style={styles.input}
+                  value={nome}
+                  onChangeText={setNome}
+                  placeholder="Enter the game name (e.g., Action Fighter)"
+                  placeholderTextColor="#67e8f9"
+                />
+                {nome.trim() && (
+                  <TouchableOpacity
+                    style={styles.clearButton}
+                    onPress={() => {
+                      setNome("");
+                      setResultados([]);
+                      setSearchNameState("");
+                    }}
+                  >
+                    <Text style={styles.clearButtonText}>✕</Text>
+                  </TouchableOpacity>
+                )}
+              </View>
 
               <TouchableOpacity
                 style={[styles.searchButton, loading && styles.disabledButton]}
@@ -350,6 +377,19 @@ export default function App() {
                       </View>
                       {isLoadingRate && <Text style={styles.loadingText}>Updating...</Text>}
                     </View>
+
+                    {/* Add to Collection Button */}
+                    <TouchableOpacity
+                      style={styles.collectionButton}
+                      onPress={() => {
+                        Alert.alert("Add to Collection", `Add "${searchNameState}" to your collection?`, [
+                          { text: "Cancel", style: "cancel" },
+                          { text: "Add", onPress: () => Alert.alert("Success", "Added to collection!") },
+                        ]);
+                      }}
+                    >
+                      <Text style={styles.collectionButtonText}>ADD TO COLLECTION</Text>
+                    </TouchableOpacity>
                   </View>
 
                   {/* Grid matching your md:grid-cols-2 lg:grid-cols-4 */}
@@ -362,6 +402,20 @@ export default function App() {
                     contentContainerStyle={styles.resultsGrid}
                     scrollEnabled={false}
                   />
+                </View>
+              )}
+
+              {/* Loading State */}
+              {loading && (
+                <View style={styles.loadingContainer}>
+                  <Text style={styles.loadingTitle}>🔍 SEARCHING...</Text>
+                  <ActivityIndicator size="large" color="#06b6d4" style={{ marginVertical: 20 }} />
+                  <View style={styles.loadingBarContainer}>
+                    <View style={styles.loadingBar}>
+                      <View style={styles.loadingBarFill} />
+                    </View>
+                  </View>
+                  <Text style={styles.loadingText}>Finding the best prices for you</Text>
                 </View>
               )}
 
@@ -668,5 +722,76 @@ const styles = StyleSheet.create({
     fontFamily: "monospace",
     textAlign: "center",
     marginTop: 8,
+  },
+  // Input container and clear button styles
+  inputContainer: {
+    position: "relative",
+    marginBottom: 16,
+  },
+  clearButton: {
+    position: "absolute",
+    right: 12,
+    top: 12,
+    backgroundColor: "#ef4444",
+    borderRadius: 12,
+    width: 24,
+    height: 24,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  clearButtonText: {
+    color: "white",
+    fontSize: 12,
+    fontWeight: "bold",
+  },
+  // Collection button styles
+  collectionButton: {
+    backgroundColor: "#f59e0b", // amber-500
+    paddingVertical: 14,
+    paddingHorizontal: 20,
+    borderRadius: 12,
+    alignItems: "center",
+    marginTop: 16,
+    borderWidth: 2,
+    borderColor: "rgba(245,158,11,0.5)",
+  },
+  collectionButtonText: {
+    color: "white",
+    fontSize: 16,
+    fontWeight: "bold",
+    fontFamily: "monospace",
+  },
+  // Loading styles
+  loadingContainer: {
+    alignItems: "center",
+    padding: 40,
+    backgroundColor: "rgba(0,0,0,0.3)",
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: "rgba(6,182,212,0.4)",
+    marginTop: 24,
+  },
+  loadingTitle: {
+    fontSize: 20,
+    color: "#06b6d4",
+    marginBottom: 20,
+    fontFamily: "monospace",
+    fontWeight: "bold",
+  },
+  loadingBarContainer: {
+    width: "100%",
+    marginBottom: 16,
+  },
+  loadingBar: {
+    height: 6,
+    backgroundColor: "rgba(6,182,212,0.2)",
+    borderRadius: 3,
+    overflow: "hidden",
+  },
+  loadingBarFill: {
+    height: "100%",
+    backgroundColor: "#06b6d4",
+    borderRadius: 3,
+    width: "100%",
   },
 });
