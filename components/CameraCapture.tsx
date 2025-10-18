@@ -92,7 +92,7 @@ export default function CameraCapture({ onImageCaptured, isProcessing }: CameraC
       </TouchableOpacity>
 
       <TouchableOpacity style={[styles.actionButton, styles.galleryButton]} onPress={pickImage} disabled={isProcessing}>
-        <Text style={styles.actionButtonText}>CHOOSE FROM GALLERY</Text>
+        <Text style={styles.actionButtonText}>UPLOAD IMAGE</Text>
       </TouchableOpacity>
     </View>
   );

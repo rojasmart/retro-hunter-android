@@ -83,11 +83,46 @@ export default function App() {
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
   const [currency, setCurrency] = useState<"USD" | "EUR">("USD");
   const [exchangeRate, setExchangeRate] = useState(0.86);
+  const [isLoadingRate, setIsLoadingRate] = useState(false);
 
   // Add this useEffect to log the API URL
   useEffect(() => {
     console.log("API_BASE_URL:", API_BASE_URL);
   }, []);
+
+  // Fetch exchange rate from API (same as webapp)
+  const fetchExchangeRate = async () => {
+    try {
+      setIsLoadingRate(true);
+      const response = await fetch("https://api.exchangerate-api.com/v4/latest/USD");
+      const data = await response.json();
+
+      if (data.rates && data.rates.EUR) {
+        setExchangeRate(data.rates.EUR);
+        console.log("Exchange rate updated:", data.rates.EUR);
+      }
+    } catch (error) {
+      console.error("Failed to fetch exchange rate, using fallback 0.86:", error);
+      setExchangeRate(0.86); // Fallback rate
+    } finally {
+      setIsLoadingRate(false);
+    }
+  };
+
+  // Fetch exchange rate on component mount
+  useEffect(() => {
+    fetchExchangeRate();
+  }, []);
+
+  // Function to convert price based on selected currency
+  const convertPrice = (price: number) => {
+    return currency === "EUR" ? (price * exchangeRate).toFixed(2) : price.toFixed(2);
+  };
+
+  // Function to get currency symbol
+  const getCurrencySymbol = () => {
+    return currency === "EUR" ? "€" : "$";
+  };
 
   // Update min/max when results change
   useEffect(() => {
@@ -204,15 +239,6 @@ export default function App() {
     .filter((item) => item.price >= minPrice && item.price <= maxPrice)
     .sort((a, b) => (sortOrder === "asc" ? a.price - b.price : b.price - a.price));
 
-  // Currency conversion functions (matching your webapp)
-  const convertPrice = (price: number) => {
-    return currency === "EUR" ? (price * exchangeRate).toFixed(2) : price.toFixed(2);
-  };
-
-  const getCurrencySymbol = () => {
-    return currency === "EUR" ? "€" : "$";
-  };
-
   const renderGameItem = ({ item, index }: { item: GameResult; index: number }) => (
     <TouchableOpacity style={styles.gameCard} onPress={() => Linking.openURL(item.link)}>
       {item.image && <Image source={{ uri: item.image }} style={styles.gameImage} resizeMode="cover" />}
@@ -296,6 +322,33 @@ export default function App() {
                           {getCurrencySymbol()} {convertPrice(Number(averagePrice))}
                         </Text>
                       </View>
+                    </View>
+
+                    {/* Currency Controls - matching webapp */}
+                    <View style={styles.currencyContainer}>
+                      <View style={styles.currencyRow}>
+                        <Text style={styles.currencyLabel}>Currency:</Text>
+                        <TouchableOpacity style={styles.refreshButton} onPress={fetchExchangeRate} disabled={isLoadingRate}>
+                          <Text style={styles.refreshButtonText}>{isLoadingRate ? "⟳" : "Refresh"}</Text>
+                        </TouchableOpacity>
+                      </View>
+                      <View style={styles.currencySelector}>
+                        <TouchableOpacity
+                          style={[styles.currencyOption, currency === "USD" && styles.currencyOptionActive]}
+                          onPress={() => setCurrency("USD")}
+                        >
+                          <Text style={[styles.currencyOptionText, currency === "USD" && styles.currencyOptionTextActive]}>USD ($)</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                          style={[styles.currencyOption, currency === "EUR" && styles.currencyOptionActive]}
+                          onPress={() => setCurrency("EUR")}
+                        >
+                          <Text style={[styles.currencyOptionText, currency === "EUR" && styles.currencyOptionTextActive]}>
+                            EUR (€) - {exchangeRate.toFixed(4)}
+                          </Text>
+                        </TouchableOpacity>
+                      </View>
+                      {isLoadingRate && <Text style={styles.loadingText}>Updating...</Text>}
                     </View>
                   </View>
 
@@ -427,7 +480,7 @@ const styles = StyleSheet.create({
   statsContainer: {
     backgroundColor: "rgba(0,0,0,0.4)",
     borderRadius: 16,
-    padding: 24,
+    padding: 20,
     marginBottom: 24,
     borderWidth: 2,
     borderColor: "rgba(6,182,212,0.5)",
@@ -446,7 +499,7 @@ const styles = StyleSheet.create({
   },
   statCard: {
     flex: 1,
-    padding: 16,
+    padding: 12,
     borderRadius: 12,
     alignItems: "center",
   },
@@ -474,7 +527,7 @@ const styles = StyleSheet.create({
   },
   statValue: {
     color: "white",
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: "bold",
     fontFamily: "monospace",
   },
@@ -548,5 +601,72 @@ const styles = StyleSheet.create({
     color: "#6b7280",
     fontSize: 12,
     fontFamily: "monospace",
+  },
+  // Currency converter styles
+  currencyContainer: {
+    marginTop: 16,
+    padding: 16,
+    backgroundColor: "rgba(0,0,0,0.2)",
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: "rgba(6,182,212,0.3)",
+  },
+  currencyRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 12,
+  },
+  currencyLabel: {
+    color: "#67e8f9",
+    fontSize: 14,
+    fontWeight: "bold",
+    fontFamily: "monospace",
+  },
+  refreshButton: {
+    backgroundColor: "#3b82f6",
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 8,
+  },
+  refreshButtonText: {
+    color: "white",
+    fontSize: 12,
+    fontWeight: "bold",
+    fontFamily: "monospace",
+  },
+  currencySelector: {
+    flexDirection: "row",
+    gap: 8,
+  },
+  currencyOption: {
+    flex: 1,
+    backgroundColor: "rgba(107,114,128,0.3)",
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    borderWidth: 2,
+    borderColor: "rgba(6,182,212,0.3)",
+    alignItems: "center",
+  },
+  currencyOptionActive: {
+    backgroundColor: "rgba(6,182,212,0.2)",
+    borderColor: "#06b6d4",
+  },
+  currencyOptionText: {
+    color: "#67e8f9",
+    fontSize: 12,
+    fontWeight: "bold",
+    fontFamily: "monospace",
+  },
+  currencyOptionTextActive: {
+    color: "#06b6d4",
+  },
+  loadingText: {
+    color: "#67e8f9",
+    fontSize: 10,
+    fontFamily: "monospace",
+    textAlign: "center",
+    marginTop: 8,
   },
 });
