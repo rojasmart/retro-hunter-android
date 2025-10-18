@@ -4,6 +4,8 @@ import { LinearGradient } from "expo-linear-gradient";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import CameraCapture from "./components/CameraCapture";
 
+import { API_BASE_URL } from "./config";
+
 interface GameResult {
   title: string;
   price: number;
@@ -102,7 +104,7 @@ export default function App() {
       });
 
       // Replace with your deployed webapp URL
-      const res = await fetch(`https://your-deployed-webapp.vercel.app/api/ebay?${params.toString()}`);
+      const res = await fetch(`${API_BASE_URL}/api/ebay?${params.toString()}`);
       const data = await res.json();
       setResultados(data.resultados || []);
     } catch (error) {
@@ -124,10 +126,7 @@ export default function App() {
       } as any);
 
       // Replace with your deployed webapp URL
-      const response = await fetch("https://your-deployed-webapp.vercel.app/api/ocr", {
-        method: "POST",
-        body: formData,
-      });
+      const response = await fetch(`${API_BASE_URL}/api/ocr`, { method: "POST", body: formData });
 
       const data = await response.json();
 
