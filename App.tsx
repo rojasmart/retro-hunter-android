@@ -84,6 +84,7 @@ export default function App() {
   const [currency, setCurrency] = useState<"USD" | "EUR">("USD");
   const [exchangeRate, setExchangeRate] = useState(0.86);
 
+  // Add this useEffect to log the API URL
   useEffect(() => {
     console.log("API_BASE_URL:", API_BASE_URL);
   }, []);
@@ -107,8 +108,8 @@ export default function App() {
         condition: condition,
       });
 
-      // Debug: build and log the full URL before fetching
-      const url = `${API_BASE_URL}/api/ebay?${params.toString()}`;
+      // Debug: build and log the full URL before fetching - usar FastAPI para eBay
+      const url = `${API_BASE_URL}/ebay-search?${params.toString()}`;
       console.log("[SEARCH] fetching:", url);
 
       const res = await fetch(url);
@@ -146,7 +147,7 @@ export default function App() {
       // Add the prompt parameter that your backend expects
       formData.append("prompt", "return the name and platform of this game with comma separated");
 
-      // Use the correct endpoint from your backend
+      // Use FastAPI for OCR
       const ocrUrl = `${API_BASE_URL}/ask-agent-image`;
       console.log("[OCR] posting to:", ocrUrl, "imageUri:", imageUri);
 

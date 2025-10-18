@@ -20,5 +20,7 @@ if (Platform.OS === "android") {
 }
 
 // Para testar num dispositivo físico, substitua por: host = "192.168.1.239";
+
+// FastAPI backend (porta 8000) - para OCR e eBay
 export const API_BASE_URL = `http://${host}:8000`;
 export const API_DOCS_URL = `${API_BASE_URL}/docs`;
