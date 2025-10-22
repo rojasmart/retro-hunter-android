@@ -24,3 +24,5 @@ if (Platform.OS === "android") {
 // FastAPI backend (porta 8000) - para OCR e eBay
 export const API_BASE_URL = `http://${host}:8000`;
 export const API_DOCS_URL = `${API_BASE_URL}/docs`;
+// Separate auth service (e.g. your auth server on port 3000)
+export const AUTH_BASE_URL = `http://${host}:3000/api`;

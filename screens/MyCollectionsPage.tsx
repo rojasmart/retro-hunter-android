@@ -2,13 +2,22 @@ import React, { useEffect, useState } from "react";
 import { View, Text, FlatList, TouchableOpacity, StyleSheet, Alert, ActivityIndicator, TextInput, Modal } from "react-native";
 import { useAuth } from "../context/AuthContext";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { API_BASE_URL } from "../config";
+import { API_BASE_URL, AUTH_BASE_URL } from "../config";
 
 interface Item {
   _id: string;
   gameTitle: string;
   platform: string;
+  condition?: string;
   purchasePrice?: number;
+  lowestPrice?: number;
+  highestPrice?: number;
+  averagePrice?: number;
+  notes?: string;
+  images?: string[];
+  createdAt?: string;
+  isWishlist?: boolean;
+  completionStatus?: string;
 }
 
 export default function MyCollectionsPage({ onBack }: { onBack?: () => void }) {
@@ -33,19 +42,86 @@ export default function MyCollectionsPage({ onBack }: { onBack?: () => void }) {
       }
 
       const token = await AsyncStorage.getItem("auth_token");
+      // Try multiple endpoints in order: /gameincollections/{uid}, ?userId=uid, then /gameincollections
+      const candidates = [
+        `${AUTH_BASE_URL}/gameincollections/${uid}`,
+        `${AUTH_BASE_URL}/gameincollections?userId=${uid}`,
+        `${AUTH_BASE_URL}/gameincollections`,
+        // Some servers expose /collection (singular)
+        `${AUTH_BASE_URL}/collection/${uid}`,
+        `${AUTH_BASE_URL}/collection?userId=${uid}`,
+        `${AUTH_BASE_URL}/collection`,
+      ];
 
-      const res = await fetch(`${API_BASE_URL}/collections/${uid}`, {
-        headers: token
-          ? {
-              Authorization: `Bearer ${token}`,
-              "Content-Type": "application/json",
+      let found: any = null;
+      for (const url of candidates) {
+        try {
+          console.debug("fetchCollections trying:", url, "token?", !!token);
+          const res = await fetch(url, {
+            headers: token ? { Authorization: `Bearer ${token}`, "Content-Type": "application/json" } : { "Content-Type": "application/json" },
+          });
+
+          console.debug("fetchCollections status for", url, res.status);
+
+          // If server returned HTML (like an HTML 404 page), read text and log it
+          const ct = res.headers.get("content-type") || "";
+          if (!res.ok) {
+            // if 404, continue to next candidate
+            if (res.status === 404) {
+              const txt = await res.text().catch(() => "<no body>");
+              console.warn("fetchCollections 404 body:", txt.slice ? txt.slice(0, 500) : txt);
+              continue;
             }
-          : { "Content-Type": "application/json" },
-      });
+            const txt = await res.text().catch(() => "<no body>");
+            console.warn("fetchCollections non-ok response:", res.status, txt.slice ? txt.slice(0, 500) : txt);
+            continue;
+          }
 
-      const data = await res.json();
-      const list = data.collections || data.items || data || [];
-      setItems(Array.isArray(list) ? list : []);
+          // Try to parse JSON only when content-type looks like JSON
+          if (ct.includes("application/json") || ct.includes("application/ld+json") || ct.includes("json")) {
+            const data = await res.json().catch((e) => {
+              console.error("fetchCollections json parse error for", url, e);
+              return null;
+            });
+            console.debug("fetchCollections body for", url, data);
+            if (data) {
+              found = data;
+              break;
+            }
+          } else {
+            // Not JSON (could be HTML) - read text and skip
+            const txt = await res.text().catch(() => "<no body>");
+            console.warn("fetchCollections unexpected content-type for", url, ct, "body:", txt.slice ? txt.slice(0, 500) : txt);
+            continue;
+          }
+        } catch (e) {
+          console.error("fetchCollections fetch error for candidate:", url, e);
+          continue;
+        }
+      }
+
+      if (!found) {
+        throw new Error("No valid response from gameincollections endpoints");
+      }
+
+      // Normalize the response into an array; some APIs return { games: [...] }
+      let list = found.collections || found.items || found.games || found || [];
+      if (!Array.isArray(list) && typeof list === "object") {
+        // Some APIs return { data: [...] } or an object - attempt to find array values
+        const possible = Object.values(list).find((v) => Array.isArray(v));
+        if (possible) list = possible as any[];
+      }
+
+      // If we requested the general /gameincollections and it returned all items, filter by userId
+      if (Array.isArray(list) && list.length > 0) {
+        const filtered = list.filter((it: any) => {
+          if (!it) return false;
+          return (it.userId ?? it.user ?? it.userid ?? it.user_id) === uid;
+        });
+        setItems(filtered);
+      } else {
+        setItems(Array.isArray(list) ? list : []);
+      }
     } catch (error) {
       console.error("fetchCollections", error);
       Alert.alert("Error", "Failed to fetch collections");
@@ -68,18 +144,33 @@ export default function MyCollectionsPage({ onBack }: { onBack?: () => void }) {
 
       const body = { gameTitle: newTitle, platform: newPlatform, userId: uid };
 
-      const res = await fetch(`${API_BASE_URL}/collections`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(body),
-      });
-
-      const data = await res.json().catch(() => ({} as any));
-      if (!res.ok) {
-        Alert.alert("Error", data?.error || "Failed to add item");
+      // Try POST to /gameincollections then fallback to /collection
+      const postCandidates = [`${AUTH_BASE_URL}/gameincollections`, `${AUTH_BASE_URL}/collection`];
+      let postOk = false;
+      for (const postUrl of postCandidates) {
+        try {
+          console.debug("addItem POST:", postUrl, "body:", body, "token?", !!token);
+          const res = await fetch(postUrl, {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(body),
+          });
+          const data = await res.json().catch(() => ({} as any));
+          console.debug("addItem status for", postUrl, res.status, "body:", data);
+          if (res.ok) {
+            postOk = true;
+            break;
+          }
+        } catch (e) {
+          console.error("addItem error for", postUrl, e);
+          continue;
+        }
+      }
+      if (!postOk) {
+        Alert.alert("Error", "Failed to add item");
         return;
       }
 
@@ -102,14 +193,25 @@ export default function MyCollectionsPage({ onBack }: { onBack?: () => void }) {
       const token = await AsyncStorage.getItem("auth_token");
       if (!token) throw new Error("Not authenticated");
 
-      const res = await fetch(`${API_BASE_URL}/collections/${id}`, {
-        method: "DELETE",
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
-      if (!res.ok) {
-        const data = await res.json().catch(() => ({} as any));
-        Alert.alert("Error", data?.error || "Failed to delete");
+      // Try DELETE on both candidate endpoints
+      const delCandidates = [`${AUTH_BASE_URL}/gameincollections/${id}`, `${AUTH_BASE_URL}/collection/${id}`];
+      let delOk = false;
+      for (const delUrl of delCandidates) {
+        try {
+          console.debug("removeItem DELETE:", delUrl, "token?", !!token);
+          const res = await fetch(delUrl, { method: "DELETE", headers: { Authorization: `Bearer ${token}` } });
+          console.debug("removeItem status for", delUrl, res.status);
+          if (res.ok) {
+            delOk = true;
+            break;
+          }
+        } catch (e) {
+          console.error("removeItem error for", delUrl, e);
+          continue;
+        }
+      }
+      if (!delOk) {
+        Alert.alert("Error", "Failed to delete");
         return;
       }
 
@@ -125,8 +227,30 @@ export default function MyCollectionsPage({ onBack }: { onBack?: () => void }) {
   const renderItem = ({ item }: { item: Item }) => (
     <View style={styles.card}>
       <Text style={styles.title}>{item.gameTitle}</Text>
-      <Text style={styles.meta}>{item.platform}</Text>
-      <Text style={styles.price}>Paid: {item.purchasePrice ?? "-"}</Text>
+      <Text style={styles.meta}>
+        {item.platform} • {item.condition ?? ""}
+      </Text>
+      <Text style={styles.price}>Paid: ${item.purchasePrice ?? "-"}</Text>
+      <View style={styles.statRow}>
+        <View style={[styles.statChip, styles.lowestChip]}>
+          <Text style={styles.statIcon}>⬇️</Text>
+          <Text style={styles.statLabel}>Lowest</Text>
+          <Text style={styles.statValue}>${item.lowestPrice ?? "-"}</Text>
+        </View>
+        <View style={[styles.statChip, styles.averageChip]}>
+          <Text style={styles.statIcon}>📊</Text>
+          <Text style={styles.statLabel}>Avg</Text>
+          <Text style={styles.statValue}>${item.averagePrice ?? "-"}</Text>
+        </View>
+        <View style={[styles.statChip, styles.highestChip]}>
+          <Text style={styles.statIcon}>⬆️</Text>
+          <Text style={styles.statLabel}>Highest</Text>
+          <Text style={styles.statValue}>${item.highestPrice ?? "-"}</Text>
+        </View>
+      </View>
+      {item.notes ? <Text style={styles.notes}>Notes: {item.notes}</Text> : null}
+
+      {item.createdAt ? <Text style={styles.small}>Added: {new Date(item.createdAt).toLocaleString()}</Text> : null}
     </View>
   );
 
@@ -199,4 +323,44 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   modalButton: { padding: 10 },
+  small: { color: "#9ca3af", fontSize: 12, marginTop: 6 },
+  notes: { color: "#cfefff", fontSize: 13, marginTop: 6 },
+  // thumb style removed (images no longer rendered inline)
+  statRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginTop: 8,
+  },
+  statChip: {
+    flex: 1,
+    alignItems: "center",
+    paddingVertical: 6,
+    paddingHorizontal: 8,
+    borderRadius: 10,
+    marginHorizontal: 4,
+  },
+  lowestChip: {
+    backgroundColor: "rgba(16,185,129,0.12)",
+  },
+  averageChip: {
+    backgroundColor: "rgba(59,130,246,0.12)",
+  },
+  highestChip: {
+    backgroundColor: "rgba(239,68,68,0.12)",
+  },
+  statIcon: {
+    fontSize: 14,
+    marginBottom: 2,
+  },
+  statLabel: {
+    fontSize: 11,
+    color: "#9ca3af",
+    fontFamily: "monospace",
+  },
+  statValue: {
+    fontSize: 13,
+    fontWeight: "bold",
+    color: "#e6f7ff",
+    marginTop: 2,
+  },
 });

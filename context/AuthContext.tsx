@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useReducer, useEffect } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { API_BASE_URL } from "../config";
+import { API_BASE_URL, AUTH_BASE_URL } from "../config";
 import { Alert } from "react-native";
 
 // Types
@@ -85,7 +85,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           return;
         }
 
-        const response = await fetch(`${API_BASE_URL}/auth/verify`, {
+        const response = await fetch(`${AUTH_BASE_URL}/auth/verify`, {
           headers: { Authorization: `Bearer ${token}` },
         });
 
@@ -114,7 +114,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       dispatch({ type: "SET_LOADING", payload: true });
       dispatch({ type: "CLEAR_ERROR" });
 
-      const response = await fetch(`${API_BASE_URL}/auth/login`, {
+      const response = await fetch(`${AUTH_BASE_URL}/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
@@ -148,7 +148,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         return false;
       }
 
-      const response = await fetch(`${API_BASE_URL}/auth/register`, {
+      const response = await fetch(`${AUTH_BASE_URL}/auth/register`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name, email, password }),
@@ -176,7 +176,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       const token = await AsyncStorage.getItem("auth_token");
       if (token) {
-        await fetch(`${API_BASE_URL}/auth/logout`, { method: "POST", headers: { Authorization: `Bearer ${token}` } });
+        await fetch(`${AUTH_BASE_URL}/auth/logout`, { method: "POST", headers: { Authorization: `Bearer ${token}` } });
       }
     } catch (error) {
       console.error("Erro no logout:", error);
