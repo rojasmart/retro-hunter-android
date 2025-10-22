@@ -88,6 +88,7 @@ export default function App() {
   const [searchNameState, setSearchNameState] = useState<string>("");
   const [loading, setLoading] = useState(false);
   const [page, setPage] = useState<"home" | "account" | "collections">("home");
+  const [showSearchExtras, setShowSearchExtras] = useState<boolean>(false);
 
   // Price filters (matching your webapp)
   const prices = resultados.map((item) => item.price).filter((price) => price > 0);
@@ -287,11 +288,10 @@ export default function App() {
                     <Text style={styles.tagline}>Hunt, Decide, Sell</Text>
                   </View>
 
-                  {/* Centered search section */}
+                  {/* Centered search section - extras appear when input is focused */}
                   <View style={styles.searchWrapper}>
                     <View style={styles.searchSectionCentered}>
-                      <CameraCapture onImageCaptured={handleImageCaptured} isProcessing={loading} />
-
+                      {/* Input stays visible; when focused we show CameraCapture and Hunt button */}
                       <View style={styles.inputContainer}>
                         <TextInput
                           style={styles.input}
@@ -299,6 +299,8 @@ export default function App() {
                           onChangeText={setNome}
                           placeholder="Enter the game name (e.g., Action Fighter)"
                           placeholderTextColor="#67e8f9"
+                          onFocus={() => setShowSearchExtras(true)}
+                          onBlur={() => setShowSearchExtras(false)}
                         />
                         {nome.trim() && (
                           <TouchableOpacity
@@ -314,13 +316,21 @@ export default function App() {
                         )}
                       </View>
 
-                      <TouchableOpacity
-                        style={[styles.searchButton, loading && styles.disabledButton]}
-                        onPress={() => searchEbayOnly()}
-                        disabled={loading || !nome.trim()}
-                      >
-                        <Text style={styles.searchButtonText}>{loading ? "🔍 SCANNING..." : "HUNT FOR PRICES"}</Text>
-                      </TouchableOpacity>
+                      {showSearchExtras && (
+                        <>
+                          <CameraCapture onImageCaptured={handleImageCaptured} isProcessing={loading} />
+
+                          <TouchableOpacity
+                            style={[styles.searchButton, loading && styles.disabledButton]}
+                            onPress={() => searchEbayOnly()}
+                            disabled={loading || !nome.trim()}
+                          >
+                            <Text style={styles.searchButtonText}>{loading ? "🔍 SCANNING..." : "HUNT FOR PRICES"}</Text>
+                          </TouchableOpacity>
+
+                          {/* extras hide automatically on input blur */}
+                        </>
+                      )}
                     </View>
                   </View>
 
@@ -853,6 +863,17 @@ const styles = StyleSheet.create({
     color: "#67e8f9",
     fontSize: 12,
     marginTop: 4,
+    fontFamily: "monospace",
+  },
+  hideExtrasButton: {
+    marginTop: 8,
+    alignSelf: "center",
+    paddingHorizontal: 8,
+    paddingVertical: 6,
+  },
+  hideExtrasText: {
+    color: "#9ca3af",
+    fontSize: 12,
     fontFamily: "monospace",
   },
 });
