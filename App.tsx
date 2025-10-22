@@ -16,6 +16,9 @@ import {
 import { LinearGradient } from "expo-linear-gradient";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import CameraCapture from "./components/CameraCapture";
+import MyAccount from "./screens/MyAccount";
+import MyCollectionsPage from "./screens/MyCollectionsPage";
+import { AuthProvider } from "./context/AuthContext";
 
 import { API_BASE_URL } from "./config";
 
@@ -84,6 +87,7 @@ export default function App() {
   const [resultados, setResultados] = useState<GameResult[]>([]);
   const [searchNameState, setSearchNameState] = useState<string>("");
   const [loading, setLoading] = useState(false);
+  const [page, setPage] = useState<"home" | "account" | "collections">("home");
 
   // Price filters (matching your webapp)
   const prices = resultados.map((item) => item.price).filter((price) => price > 0);
@@ -267,172 +271,187 @@ export default function App() {
   );
 
   return (
-    <SafeAreaProvider>
-      <StatusBar barStyle="light-content" backgroundColor="#111827" />
-      <LinearGradient colors={["#111827", "#1f2937", "#374151"]} style={styles.container}>
-        <SafeAreaView style={styles.safeArea}>
-          {/* Header matching your webapp exactly */}
-          <View style={styles.header}>
-            <View style={styles.headerLeft}>
-              <Text style={styles.logo}>RETRO HUNTER</Text>
-              <Text style={styles.tagline}>Hunt, Decide, Sell</Text>
-            </View>
-            <View style={styles.headerButtons}>
-              <TouchableOpacity style={styles.headerButton}>
-                <Text style={styles.headerButtonText}>Collection</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.headerButton}>
-                <Text style={styles.headerButtonText}>Account</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
+    <AuthProvider>
+      <SafeAreaProvider>
+        <StatusBar barStyle="light-content" backgroundColor="#111827" />
+        <LinearGradient colors={["#111827", "#1f2937", "#374151"]} style={styles.container}>
+          <SafeAreaView style={styles.safeArea}>
+            {/* Top header removed per UI request - branding and search will be centered on Home */}
 
-          <View style={styles.mainContent}>
-            {/* Left side equivalent - Search section (matches your w-1/2 layout) */}
-            <View style={styles.searchSection}>
-              <CameraCapture onImageCaptured={handleImageCaptured} isProcessing={loading} />
-
-              <View style={styles.inputContainer}>
-                <TextInput
-                  style={styles.input}
-                  value={nome}
-                  onChangeText={setNome}
-                  placeholder="Enter the game name (e.g., Action Fighter)"
-                  placeholderTextColor="#67e8f9"
-                />
-                {nome.trim() && (
-                  <TouchableOpacity
-                    style={styles.clearButton}
-                    onPress={() => {
-                      setNome("");
-                      setResultados([]);
-                      setSearchNameState("");
-                    }}
-                  >
-                    <Text style={styles.clearButtonText}>✕</Text>
-                  </TouchableOpacity>
-                )}
-              </View>
-
-              <TouchableOpacity
-                style={[styles.searchButton, loading && styles.disabledButton]}
-                onPress={() => searchEbayOnly()}
-                disabled={loading || !nome.trim()}
-              >
-                <Text style={styles.searchButtonText}>{loading ? "🔍 SCANNING..." : "HUNT FOR PRICES"}</Text>
-              </TouchableOpacity>
-            </View>
-
-            {/* Results section matching your webapp's right panel */}
-            <ScrollView style={styles.resultsContainer} showsVerticalScrollIndicator={false}>
-              {resultados.length > 0 && (
-                <View style={styles.resultsSection}>
-                  {/* Stats section matching your exact 3-column grid */}
-                  <View style={styles.statsContainer}>
-                    <Text style={styles.resultsTitle}>{searchNameState}</Text>
-                    <View style={styles.statsGrid}>
-                      <View style={[styles.statCard, styles.lowestCard]}>
-                        <Text style={styles.statLabel}>LOWEST</Text>
-                        <Text style={styles.statValue}>
-                          {getCurrencySymbol()} {convertPrice(lowestPrice)}
-                        </Text>
-                      </View>
-                      <View style={[styles.statCard, styles.highestCard]}>
-                        <Text style={styles.statLabel}>HIGHEST</Text>
-                        <Text style={styles.statValue}>
-                          {getCurrencySymbol()} {convertPrice(highestPrice)}
-                        </Text>
-                      </View>
-                      <View style={[styles.statCard, styles.averageCard]}>
-                        <Text style={styles.statLabel}>AVERAGE</Text>
-                        <Text style={styles.statValue}>
-                          {getCurrencySymbol()} {convertPrice(Number(averagePrice))}
-                        </Text>
-                      </View>
-                    </View>
-
-                    {/* Currency Controls - matching webapp */}
-                    <View style={styles.currencyContainer}>
-                      <View style={styles.currencyRow}>
-                        <Text style={styles.currencyLabel}>Currency:</Text>
-                        <TouchableOpacity style={styles.refreshButton} onPress={fetchExchangeRate} disabled={isLoadingRate}>
-                          <Text style={styles.refreshButtonText}>{isLoadingRate ? "⟳" : "Refresh"}</Text>
-                        </TouchableOpacity>
-                      </View>
-                      <View style={styles.currencySelector}>
-                        <TouchableOpacity
-                          style={[styles.currencyOption, currency === "USD" && styles.currencyOptionActive]}
-                          onPress={() => setCurrency("USD")}
-                        >
-                          <Text style={[styles.currencyOptionText, currency === "USD" && styles.currencyOptionTextActive]}>USD ($)</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity
-                          style={[styles.currencyOption, currency === "EUR" && styles.currencyOptionActive]}
-                          onPress={() => setCurrency("EUR")}
-                        >
-                          <Text style={[styles.currencyOptionText, currency === "EUR" && styles.currencyOptionTextActive]}>
-                            EUR (€) - {exchangeRate.toFixed(4)}
-                          </Text>
-                        </TouchableOpacity>
-                      </View>
-                      {isLoadingRate && <Text style={styles.loadingText}>Updating...</Text>}
-                    </View>
-
-                    {/* Add to Collection Button */}
-                    <TouchableOpacity
-                      style={styles.collectionButton}
-                      onPress={() => {
-                        Alert.alert("Add to Collection", `Add "${searchNameState}" to your collection?`, [
-                          { text: "Cancel", style: "cancel" },
-                          { text: "Add", onPress: () => Alert.alert("Success", "Added to collection!") },
-                        ]);
-                      }}
-                    >
-                      <Text style={styles.collectionButtonText}>ADD TO COLLECTION</Text>
-                    </TouchableOpacity>
+            <View style={styles.mainContent}>
+              {page === "home" && (
+                <>
+                  {/* Centered branding */}
+                  <View style={styles.homeHeaderCenter}>
+                    <Text style={styles.logo}>RETRO HUNTER</Text>
+                    <Text style={styles.tagline}>Hunt, Decide, Sell</Text>
                   </View>
 
-                  {/* Grid matching your md:grid-cols-2 lg:grid-cols-4 */}
-                  <FlatList
-                    data={filteredItems}
-                    renderItem={renderGameItem}
-                    numColumns={2} // Mobile: 2 columns (your lg:grid-cols-4 becomes 2 on mobile)
-                    key={2}
-                    columnWrapperStyle={styles.row}
-                    contentContainerStyle={styles.resultsGrid}
-                    scrollEnabled={false}
-                  />
-                </View>
-              )}
+                  {/* Centered search section */}
+                  <View style={styles.searchWrapper}>
+                    <View style={styles.searchSectionCentered}>
+                      <CameraCapture onImageCaptured={handleImageCaptured} isProcessing={loading} />
 
-              {/* Loading State */}
-              {loading && (
-                <View style={styles.loadingContainer}>
-                  <Text style={styles.loadingTitle}>🔍 SEARCHING...</Text>
-                  <ActivityIndicator size="large" color="#06b6d4" style={{ marginVertical: 20 }} />
-                  <View style={styles.loadingBarContainer}>
-                    <View style={styles.loadingBar}>
-                      <View style={styles.loadingBarFill} />
+                      <View style={styles.inputContainer}>
+                        <TextInput
+                          style={styles.input}
+                          value={nome}
+                          onChangeText={setNome}
+                          placeholder="Enter the game name (e.g., Action Fighter)"
+                          placeholderTextColor="#67e8f9"
+                        />
+                        {nome.trim() && (
+                          <TouchableOpacity
+                            style={styles.clearButton}
+                            onPress={() => {
+                              setNome("");
+                              setResultados([]);
+                              setSearchNameState("");
+                            }}
+                          >
+                            <Text style={styles.clearButtonText}>✕</Text>
+                          </TouchableOpacity>
+                        )}
+                      </View>
+
+                      <TouchableOpacity
+                        style={[styles.searchButton, loading && styles.disabledButton]}
+                        onPress={() => searchEbayOnly()}
+                        disabled={loading || !nome.trim()}
+                      >
+                        <Text style={styles.searchButtonText}>{loading ? "🔍 SCANNING..." : "HUNT FOR PRICES"}</Text>
+                      </TouchableOpacity>
                     </View>
                   </View>
-                  <Text style={styles.loadingText}>Finding the best prices for you</Text>
-                </View>
+
+                  {/* Results section matching your webapp's right panel */}
+                  <ScrollView style={styles.resultsContainer} showsVerticalScrollIndicator={false}>
+                    {resultados.length > 0 && (
+                      <View style={styles.resultsSection}>
+                        {/* Stats section matching your exact 3-column grid */}
+                        <View style={styles.statsContainer}>
+                          <Text style={styles.resultsTitle}>{searchNameState}</Text>
+                          <View style={styles.statsGrid}>
+                            <View style={[styles.statCard, styles.lowestCard]}>
+                              <Text style={styles.statLabel}>LOWEST</Text>
+                              <Text style={styles.statValue}>
+                                {getCurrencySymbol()} {convertPrice(lowestPrice)}
+                              </Text>
+                            </View>
+                            <View style={[styles.statCard, styles.highestCard]}>
+                              <Text style={styles.statLabel}>HIGHEST</Text>
+                              <Text style={styles.statValue}>
+                                {getCurrencySymbol()} {convertPrice(highestPrice)}
+                              </Text>
+                            </View>
+                            <View style={[styles.statCard, styles.averageCard]}>
+                              <Text style={styles.statLabel}>AVERAGE</Text>
+                              <Text style={styles.statValue}>
+                                {getCurrencySymbol()} {convertPrice(Number(averagePrice))}
+                              </Text>
+                            </View>
+                          </View>
+
+                          {/* Currency Controls - matching webapp */}
+                          <View style={styles.currencyContainer}>
+                            <View style={styles.currencyRow}>
+                              <Text style={styles.currencyLabel}>Currency:</Text>
+                              <TouchableOpacity style={styles.refreshButton} onPress={fetchExchangeRate} disabled={isLoadingRate}>
+                                <Text style={styles.refreshButtonText}>{isLoadingRate ? "⟳" : "Refresh"}</Text>
+                              </TouchableOpacity>
+                            </View>
+                            <View style={styles.currencySelector}>
+                              <TouchableOpacity
+                                style={[styles.currencyOption, currency === "USD" && styles.currencyOptionActive]}
+                                onPress={() => setCurrency("USD")}
+                              >
+                                <Text style={[styles.currencyOptionText, currency === "USD" && styles.currencyOptionTextActive]}>USD ($)</Text>
+                              </TouchableOpacity>
+                              <TouchableOpacity
+                                style={[styles.currencyOption, currency === "EUR" && styles.currencyOptionActive]}
+                                onPress={() => setCurrency("EUR")}
+                              >
+                                <Text style={[styles.currencyOptionText, currency === "EUR" && styles.currencyOptionTextActive]}>
+                                  EUR (€) - {exchangeRate.toFixed(4)}
+                                </Text>
+                              </TouchableOpacity>
+                            </View>
+                            {isLoadingRate && <Text style={styles.loadingText}>Updating...</Text>}
+                          </View>
+
+                          {/* Add to Collection Button */}
+                          <TouchableOpacity
+                            style={styles.collectionButton}
+                            onPress={() => {
+                              Alert.alert("Add to Collection", `Add "${searchNameState}" to your collection?`, [
+                                { text: "Cancel", style: "cancel" },
+                                { text: "Add", onPress: () => Alert.alert("Success", "Added to collection!") },
+                              ]);
+                            }}
+                          >
+                            <Text style={styles.collectionButtonText}>ADD TO COLLECTION</Text>
+                          </TouchableOpacity>
+                        </View>
+
+                        {/* Grid matching your md:grid-cols-2 lg:grid-cols-4 */}
+                        <FlatList
+                          data={filteredItems}
+                          renderItem={renderGameItem}
+                          numColumns={2} // Mobile: 2 columns (your lg:grid-cols-4 becomes 2 on mobile)
+                          key={2}
+                          columnWrapperStyle={styles.row}
+                          contentContainerStyle={styles.resultsGrid}
+                          scrollEnabled={false}
+                        />
+                      </View>
+                    )}
+
+                    {/* Loading State */}
+                    {loading && (
+                      <View style={styles.loadingContainer}>
+                        <Text style={styles.loadingTitle}>🔍 SEARCHING...</Text>
+                        <ActivityIndicator size="large" color="#06b6d4" style={{ marginVertical: 20 }} />
+                        <View style={styles.loadingBarContainer}>
+                          <View style={styles.loadingBar}>
+                            <View style={styles.loadingBarFill} />
+                          </View>
+                        </View>
+                        <Text style={styles.loadingText}>Finding the best prices for you</Text>
+                      </View>
+                    )}
+
+                    {!loading && resultados.length === 0 && nome.trim() && (
+                      <View style={styles.noResults}>
+                        <Text style={styles.noResultsTitle}>😕 NO DATA FOUND</Text>
+                        <Text style={styles.noResultsText}>
+                          &gt; No results for "<Text style={styles.noResultsHighlight}>{nome}</Text>"
+                        </Text>
+                        <Text style={styles.noResultsSubtext}>Try different search terms or filters</Text>
+                      </View>
+                    )}
+                  </ScrollView>
+                </>
               )}
 
-              {!loading && resultados.length === 0 && nome.trim() && (
-                <View style={styles.noResults}>
-                  <Text style={styles.noResultsTitle}>😕 NO DATA FOUND</Text>
-                  <Text style={styles.noResultsText}>
-                    &gt; No results for "<Text style={styles.noResultsHighlight}>{nome}</Text>"
-                  </Text>
-                  <Text style={styles.noResultsSubtext}>Try different search terms or filters</Text>
-                </View>
-              )}
-            </ScrollView>
-          </View>
-        </SafeAreaView>
-      </LinearGradient>
-    </SafeAreaProvider>
+              {page === "collections" && <MyCollectionsPage onBack={() => setPage("home")} />}
+              {page === "account" && <MyAccount onBack={() => setPage("home")} />}
+            </View>
+
+            {/* Bottom menu with centered icons for Collections and Account */}
+            <View style={styles.bottomMenu}>
+              <TouchableOpacity style={styles.bottomButton} onPress={() => setPage("collections")}>
+                <Text style={styles.bottomIcon}>📁</Text>
+                <Text style={styles.bottomLabel}>Collections</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.bottomButton} onPress={() => setPage("account")}>
+                <Text style={styles.bottomIcon}>👤</Text>
+                <Text style={styles.bottomLabel}>Account</Text>
+              </TouchableOpacity>
+            </View>
+          </SafeAreaView>
+        </LinearGradient>
+      </SafeAreaProvider>
+    </AuthProvider>
   );
 }
 
@@ -793,5 +812,47 @@ const styles = StyleSheet.create({
     backgroundColor: "#06b6d4",
     borderRadius: 3,
     width: "100%",
+  },
+  // New styles for centered home header and bottom menu
+  homeHeaderCenter: {
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 20,
+  },
+  searchWrapper: {
+    alignItems: "center",
+    justifyContent: "flex-start",
+    paddingHorizontal: 20,
+  },
+  searchSectionCentered: {
+    width: "100%",
+    maxWidth: 640,
+    backgroundColor: "rgba(0,0,0,0.35)",
+    padding: 16,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: "rgba(6,182,212,0.25)",
+  },
+  bottomMenu: {
+    flexDirection: "row",
+    justifyContent: "space-around",
+    alignItems: "center",
+    paddingVertical: 12,
+    borderTopWidth: 1,
+    borderTopColor: "rgba(55,65,81,0.6)",
+    backgroundColor: "rgba(17,24,39,0.9)",
+  },
+  bottomButton: {
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  bottomIcon: {
+    fontSize: 22,
+  },
+  bottomLabel: {
+    color: "#67e8f9",
+    fontSize: 12,
+    marginTop: 4,
+    fontFamily: "monospace",
   },
 });
