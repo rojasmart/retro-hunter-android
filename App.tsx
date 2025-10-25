@@ -86,6 +86,7 @@ function normalizePlatform(input?: string): Platform {
 function AppContent() {
   const [nome, setNome] = useState("");
   const [platform, setPlatform] = useState<Platform>("all");
+  const [detectedPlatformName, setDetectedPlatformName] = useState<string>(""); // Store original OCR platform name
   const [condition, setCondition] = useState<string>("all");
   const [resultados, setResultados] = useState<GameResult[]>([]);
   const [searchNameState, setSearchNameState] = useState<string>("");
@@ -164,6 +165,11 @@ function AppContent() {
     const finalSearchName = searchName ?? nome;
     setSearchNameState(finalSearchName);
 
+    // If this is a manual search (not from OCR), clear the detected platform name
+    if (!platformParam) {
+      setDetectedPlatformName("");
+    }
+
     console.log("[SEARCH] searchName:", finalSearchName);
     console.log("[SEARCH] platformParam:", platformParam);
     console.log("[SEARCH] current platform state:", platform);
@@ -215,7 +221,11 @@ function AppContent() {
     if (typeof plataforma === "string" && plataforma.trim() && plataforma.toLowerCase() !== "all") {
       const normalized = normalizePlatform(plataforma);
       console.log("[handleOCRExtraction] normalized plataforma:", normalized);
+      console.log("[handleOCRExtraction] storing original platform name:", plataforma);
+
+      // Store both: normalized for filtering, original for saving to collection
       setPlatform(normalized);
+      setDetectedPlatformName(plataforma.trim()); // Store original detected name
       platformToUse = normalized;
     }
 
@@ -326,9 +336,12 @@ function AppContent() {
       const uid = (user as any)?.id ?? (user as any)?._id ?? (user as any)?.userId;
       const token = await AsyncStorage.getItem("auth_token");
 
+      // Use original detected platform name if available, otherwise use normalized platform
+      const platformForCollection = detectedPlatformName || (platform !== "all" ? platform : "");
+
       const body: any = {
         gameTitle: (searchNameState && searchNameState.trim()) || nome || "",
-        platform: String(platform || ""),
+        platform: platformForCollection,
         condition: addConditionInput || undefined,
         purchasePrice: typeof priceNum === "number" ? priceNum : undefined,
         lowestPrice: lowestPrice || undefined,
@@ -340,6 +353,11 @@ function AppContent() {
         completionStatus: "not-started",
         userId: uid,
       };
+
+      console.log("[ADD_TO_COLLECTION] Current platform state:", platform);
+      console.log("[ADD_TO_COLLECTION] Detected platform name:", detectedPlatformName);
+      console.log("[ADD_TO_COLLECTION] Platform for collection:", platformForCollection);
+      console.log("[ADD_TO_COLLECTION] Body being sent:", body);
 
       const postCandidates = [`${AUTH_BASE_URL}/gameincollections`, `${AUTH_BASE_URL}/collection`];
       let posted = false;
