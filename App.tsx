@@ -733,7 +733,7 @@ const styles = StyleSheet.create({
   },
   searchButton: {
     backgroundColor: "#ec4899", // pink-500
-    paddingVertical: 10,
+    paddingVertical: 16,
     paddingHorizontal: 16,
     borderRadius: 12,
     alignItems: "center",
@@ -952,7 +952,6 @@ const styles = StyleSheet.create({
   // Input container and clear button styles
   inputContainer: {
     position: "relative",
-    marginBottom: 16,
   },
   clearButton: {
     position: "absolute",
