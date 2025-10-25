@@ -445,7 +445,7 @@ function AppContent() {
                         style={styles.input}
                         value={nome}
                         onChangeText={setNome}
-                        placeholder="Enter the game name (e.g., Action Fighter)"
+                        placeholder="Enter the game name..."
                         placeholderTextColor="#67e8f9"
                         onFocus={() => setShowSearchExtras(true)}
                         onBlur={() => setShowSearchExtras(false)}
@@ -725,16 +725,16 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: "#06b6d4",
     borderRadius: 12,
-    padding: 16,
+    padding: 10,
     color: "#67e8f9",
     fontSize: 16,
-    marginVertical: 16,
+    marginVertical: 2,
     fontFamily: "monospace",
   },
   searchButton: {
     backgroundColor: "#ec4899", // pink-500
-    paddingVertical: 16,
-    paddingHorizontal: 24,
+    paddingVertical: 10,
+    paddingHorizontal: 16,
     borderRadius: 12,
     alignItems: "center",
     borderWidth: 2,
@@ -973,8 +973,8 @@ const styles = StyleSheet.create({
   // Collection button styles
   collectionButton: {
     backgroundColor: "#f59e0b", // amber-500
-    paddingVertical: 14,
-    paddingHorizontal: 20,
+    paddingVertical: 10,
+    paddingHorizontal: 16,
     borderRadius: 12,
     alignItems: "center",
     marginTop: 16,
