@@ -735,6 +735,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#ec4899", // pink-500
     paddingVertical: 16,
     paddingHorizontal: 16,
+    marginTop: -12,
     borderRadius: 12,
     alignItems: "center",
     borderWidth: 2,
