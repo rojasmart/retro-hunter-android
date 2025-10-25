@@ -25,6 +25,8 @@ import { API_BASE_URL, AUTH_BASE_URL } from "./config";
 import { useAuth } from "./context/AuthContext";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
+import { MagnifyingGlassIcon, FolderIcon, UserIcon } from "react-native-heroicons/outline";
+
 interface GameResult {
   title: string;
   price: number;
@@ -602,15 +604,15 @@ function AppContent() {
           {/* Bottom menu with centered icons for Collections and Account */}
           <View style={styles.bottomMenu}>
             <TouchableOpacity style={styles.bottomButton} onPress={() => setPage("search")}>
-              <Text style={styles.bottomIcon}>🔍</Text>
+              <MagnifyingGlassIcon size={24} color={page === "search" ? "#06b6d4" : "#67e8f9"} />
               <Text style={styles.bottomLabel}>Search</Text>
             </TouchableOpacity>
             <TouchableOpacity style={styles.bottomButton} onPress={() => setPage("collections")}>
-              <Text style={styles.bottomIcon}>📁</Text>
+              <FolderIcon size={24} color={page === "collections" ? "#06b6d4" : "#67e8f9"} />
               <Text style={styles.bottomLabel}>Collections</Text>
             </TouchableOpacity>
             <TouchableOpacity style={styles.bottomButton} onPress={() => setPage("account")}>
-              <Text style={styles.bottomIcon}>👤</Text>
+              <UserIcon size={24} color={page === "account" ? "#06b6d4" : "#67e8f9"} />
               <Text style={styles.bottomLabel}>Account</Text>
             </TouchableOpacity>
           </View>
