@@ -625,19 +625,25 @@ function AppContent() {
                   onChangeText={(t) => setPurchasePriceInput(t)}
                   keyboardType="numeric"
                   style={styles.input}
+                  placeholderTextColor="white"
                 />
                 <TextInput
                   placeholder="Condition (e.g., used, new)"
                   value={addConditionInput}
                   onChangeText={setAddConditionInput}
                   style={styles.input}
+                  placeholderTextColor="white"
                 />
                 <View style={{ flexDirection: "row", justifyContent: "flex-end", marginTop: 8 }}>
-                  <TouchableOpacity style={styles.modalButton} onPress={() => setIsAddModalVisible(false)}>
-                    <Text style={{ color: "#ccc" }}>Cancel</Text>
+                  <TouchableOpacity style={[styles.modalButton, styles.modalCancelButton]} onPress={() => setIsAddModalVisible(false)}>
+                    <Text style={styles.modalCancelButtonText}>Cancel</Text>
                   </TouchableOpacity>
-                  <TouchableOpacity style={[styles.modalButton, { marginLeft: 12 }]} onPress={addToCollection} disabled={addingToCollection}>
-                    <Text style={{ color: "white" }}>{addingToCollection ? "Adding..." : "Save"}</Text>
+                  <TouchableOpacity
+                    style={[styles.modalButton, styles.modalSaveButton, { marginLeft: 12 }]}
+                    onPress={addToCollection}
+                    disabled={addingToCollection}
+                  >
+                    <Text style={styles.modalSaveButtonText}>{addingToCollection ? "Adding..." : "Save"}</Text>
                   </TouchableOpacity>
                 </View>
               </View>
@@ -723,7 +729,7 @@ const styles = StyleSheet.create({
     borderColor: "#06b6d4",
     borderRadius: 12,
     padding: 10,
-    color: "#67e8f9",
+    color: "white",
     fontSize: 16,
     marginVertical: 2,
     fontFamily: "monospace",
@@ -1080,13 +1086,34 @@ const styles = StyleSheet.create({
     borderColor: "rgba(103,232,249,0.06)",
   },
   modalTitle: { color: "#67e8f9", fontSize: 16, fontWeight: "bold", marginBottom: 8 },
-  modalButton: { padding: 10 },
+  modalButton: { padding: 6, paddingHorizontal: 12, borderRadius: 6 },
   // Home welcome screen styles
   homeWelcome: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
     paddingHorizontal: 32,
+  },
+
+  modalCancelButton: {
+    backgroundColor: "#6b7280", // gray-500
+    borderWidth: 1,
+    borderColor: "#4b5563",
+  },
+  modalCancelButtonText: {
+    color: "white",
+    fontWeight: "bold",
+    fontFamily: "monospace",
+  },
+  modalSaveButton: {
+    backgroundColor: "#10b981", // green-500
+    borderWidth: 1,
+    borderColor: "#059669",
+  },
+  modalSaveButtonText: {
+    color: "white",
+    fontWeight: "bold",
+    fontFamily: "monospace",
   },
   welcomeText: {
     color: "#67e8f9",

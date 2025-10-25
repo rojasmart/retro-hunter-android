@@ -264,10 +264,6 @@ export default function MyCollectionsPage({ onBack }: { onBack?: () => void }) {
         <View style={{ width: 64 }} />
       </View>
 
-      <TouchableOpacity style={styles.addButton} onPress={() => setIsAdding(true)}>
-        <Text style={{ color: "white", fontWeight: "bold" }}>Add Game</Text>
-      </TouchableOpacity>
-
       {loading ? (
         <ActivityIndicator color="#67e8f9" />
       ) : items.length === 0 ? (
