@@ -115,6 +115,8 @@ function AppContent() {
   const [currency, setCurrency] = useState<"USD" | "EUR">("USD");
   const [exchangeRate, setExchangeRate] = useState(0.86);
   const [isLoadingRate, setIsLoadingRate] = useState(false);
+  const [showFilters, setShowFilters] = useState(true);
+  const [showStatsExtras, setShowStatsExtras] = useState(true);
 
   // Add this useEffect to log the API URL
   useEffect(() => {
@@ -455,7 +457,15 @@ function AppContent() {
                     <View style={styles.resultsSection}>
                       {/* Stats section matching your exact 3-column grid */}
                       <View style={styles.statsContainer}>
-                        <Text style={styles.resultsTitle}>{searchNameState}</Text>
+                        <TouchableOpacity
+                          style={styles.statsHeader}
+                          onPress={() => setShowStatsExtras(!showStatsExtras)}
+                          activeOpacity={0.7}
+                        >
+                          <Text style={styles.resultsTitle}>{searchNameState}</Text>
+                          <Text style={styles.statsToggleIcon}>{showStatsExtras ? "▼" : "▶"}</Text>
+                        </TouchableOpacity>
+
                         <View style={styles.statsGrid}>
                           <View style={[styles.statCard, styles.lowestCard]}>
                             <Text style={styles.statLabel}>LOWEST</Text>
@@ -477,45 +487,130 @@ function AppContent() {
                           </View>
                         </View>
 
-                        {/* Currency Controls - matching webapp */}
-                        <View style={styles.currencyContainer}>
-                          <View style={styles.currencyRow}>
-                            <Text style={styles.currencyLabel}>Currency:</Text>
-                            <TouchableOpacity style={styles.refreshButton} onPress={fetchExchangeRate} disabled={isLoadingRate}>
-                              <Text style={styles.refreshButtonText}>{isLoadingRate ? "⟳" : "Refresh"}</Text>
-                            </TouchableOpacity>
-                          </View>
-                          <View style={styles.currencySelector}>
-                            <TouchableOpacity
-                              style={[styles.currencyOption, currency === "USD" && styles.currencyOptionActive]}
-                              onPress={() => setCurrency("USD")}
-                            >
-                              <Text style={[styles.currencyOptionText, currency === "USD" && styles.currencyOptionTextActive]}>USD ($)</Text>
-                            </TouchableOpacity>
-                            <TouchableOpacity
-                              style={[styles.currencyOption, currency === "EUR" && styles.currencyOptionActive]}
-                              onPress={() => setCurrency("EUR")}
-                            >
-                              <Text style={[styles.currencyOptionText, currency === "EUR" && styles.currencyOptionTextActive]}>
-                                EUR (€) - {exchangeRate.toFixed(4)}
-                              </Text>
-                            </TouchableOpacity>
-                          </View>
-                          {isLoadingRate && <Text style={styles.loadingText}>Updating...</Text>}
-                        </View>
+                        {showStatsExtras && (
+                          <>
+                            {/* Price Filters - Collapsible */}
+                            <View style={styles.filtersContainer}>
+                              <TouchableOpacity style={styles.filterHeader} onPress={() => setShowFilters(!showFilters)} activeOpacity={0.7}>
+                                <Text style={styles.filterTitle}>FILTERS</Text>
+                                <Text style={styles.filterToggleIcon}>{showFilters ? "▼" : "▶"}</Text>
+                              </TouchableOpacity>
 
-                        {/* Add to Collection Button */}
-                        <TouchableOpacity
-                          style={styles.collectionButton}
-                          onPress={() => {
-                            // Open modal to collect purchase price and optional condition
-                            setPurchasePriceInput("");
-                            setAddConditionInput("used");
-                            setIsAddModalVisible(true);
-                          }}
-                        >
-                          <Text style={styles.collectionButtonText}>ADD TO COLLECTION</Text>
-                        </TouchableOpacity>
+                              {showFilters && (
+                                <>
+                                  {/* Sort Order */}
+                                  <View style={styles.filterRow}>
+                                    <Text style={styles.filterLabel}>Sort by Price:</Text>
+                                    <View style={styles.sortButtons}>
+                                      <TouchableOpacity
+                                        style={[styles.sortButton, sortOrder === "asc" && styles.sortButtonActive]}
+                                        onPress={() => setSortOrder("asc")}
+                                      >
+                                        <Text style={[styles.sortButtonText, sortOrder === "asc" && styles.sortButtonTextActive]}>
+                                          ↑ Low to High
+                                        </Text>
+                                      </TouchableOpacity>
+                                      <TouchableOpacity
+                                        style={[styles.sortButton, sortOrder === "desc" && styles.sortButtonActive]}
+                                        onPress={() => setSortOrder("desc")}
+                                      >
+                                        <Text style={[styles.sortButtonText, sortOrder === "desc" && styles.sortButtonTextActive]}>
+                                          ↓ High to Low
+                                        </Text>
+                                      </TouchableOpacity>
+                                    </View>
+                                  </View>
+
+                                  {/* Price Range */}
+                                  <View style={styles.filterRow}>
+                                    <Text style={styles.filterLabel}>Price Range:</Text>
+                                    <View style={styles.priceRangeInputs}>
+                                      <View style={styles.priceInputWrapper}>
+                                        <Text style={styles.priceInputLabel}>Min:</Text>
+                                        <TextInput
+                                          style={styles.priceInput}
+                                          value={minPrice.toString()}
+                                          onChangeText={(text) => {
+                                            const num = Number(text);
+                                            if (!isNaN(num) && num >= 0) setMinPrice(num);
+                                          }}
+                                          keyboardType="numeric"
+                                          placeholderTextColor="#67e8f9"
+                                        />
+                                      </View>
+                                      <Text style={styles.priceSeparator}>-</Text>
+                                      <View style={styles.priceInputWrapper}>
+                                        <Text style={styles.priceInputLabel}>Max:</Text>
+                                        <TextInput
+                                          style={styles.priceInput}
+                                          value={maxPrice.toString()}
+                                          onChangeText={(text) => {
+                                            const num = Number(text);
+                                            if (!isNaN(num) && num >= 0) setMaxPrice(num);
+                                          }}
+                                          keyboardType="numeric"
+                                          placeholderTextColor="#67e8f9"
+                                        />
+                                      </View>
+                                    </View>
+                                  </View>
+
+                                  {/* Reset Filters Button */}
+                                  <TouchableOpacity
+                                    style={styles.resetButton}
+                                    onPress={() => {
+                                      setMinPrice(lowestPrice);
+                                      setMaxPrice(highestPrice);
+                                      setSortOrder("asc");
+                                    }}
+                                  >
+                                    <Text style={styles.resetButtonText}>Reset Filters</Text>
+                                  </TouchableOpacity>
+                                </>
+                              )}
+                            </View>
+
+                            {/* Currency Controls - matching webapp */}
+                            <View style={styles.currencyContainer}>
+                              <View style={styles.currencyRow}>
+                                <Text style={styles.currencyLabel}>Currency:</Text>
+                                <TouchableOpacity style={styles.refreshButton} onPress={fetchExchangeRate} disabled={isLoadingRate}>
+                                  <Text style={styles.refreshButtonText}>{isLoadingRate ? "⟳" : "Refresh"}</Text>
+                                </TouchableOpacity>
+                              </View>
+                              <View style={styles.currencySelector}>
+                                <TouchableOpacity
+                                  style={[styles.currencyOption, currency === "USD" && styles.currencyOptionActive]}
+                                  onPress={() => setCurrency("USD")}
+                                >
+                                  <Text style={[styles.currencyOptionText, currency === "USD" && styles.currencyOptionTextActive]}>USD ($)</Text>
+                                </TouchableOpacity>
+                                <TouchableOpacity
+                                  style={[styles.currencyOption, currency === "EUR" && styles.currencyOptionActive]}
+                                  onPress={() => setCurrency("EUR")}
+                                >
+                                  <Text style={[styles.currencyOptionText, currency === "EUR" && styles.currencyOptionTextActive]}>
+                                    EUR (€) - {exchangeRate.toFixed(4)}
+                                  </Text>
+                                </TouchableOpacity>
+                              </View>
+                              {isLoadingRate && <Text style={styles.loadingText}>Updating...</Text>}
+                            </View>
+
+                            {/* Add to Collection Button */}
+                            <TouchableOpacity
+                              style={styles.collectionButton}
+                              onPress={() => {
+                                // Open modal to collect purchase price and optional condition
+                                setPurchasePriceInput("");
+                                setAddConditionInput("used");
+                                setIsAddModalVisible(true);
+                              }}
+                            >
+                              <Text style={styles.collectionButtonText}>ADD TO COLLECTION</Text>
+                            </TouchableOpacity>
+                          </>
+                        )}
                       </View>
 
                       {/* Grid matching your md:grid-cols-2 lg:grid-cols-4 */}
@@ -777,13 +872,28 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: "rgba(6,182,212,0.5)",
   },
+  statsHeader: {
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: 16,
+    position: "relative",
+  },
   resultsTitle: {
     fontSize: 24,
     fontWeight: "bold",
     color: "#67e8f9",
     textAlign: "center",
-    marginBottom: 16,
     fontFamily: "monospace",
+    flex: 1,
+  },
+  statsToggleIcon: {
+    color: "#67e8f9",
+    fontSize: 18,
+    fontWeight: "bold",
+    fontFamily: "monospace",
+    position: "absolute",
+    right: 0,
   },
   statsGrid: {
     flexDirection: "row",
@@ -892,6 +1002,124 @@ const styles = StyleSheet.create({
   noResultsSubtext: {
     color: "#6b7280",
     fontSize: 12,
+    fontFamily: "monospace",
+  },
+  // Filter styles
+  filtersContainer: {
+    marginTop: 16,
+    padding: 16,
+    backgroundColor: "rgba(0,0,0,0.2)",
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: "rgba(6,182,212,0.3)",
+  },
+  filterHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 12,
+  },
+  filterTitle: {
+    color: "#67e8f9",
+    fontSize: 16,
+    fontWeight: "bold",
+    fontFamily: "monospace",
+    flex: 1,
+    textAlign: "center",
+  },
+  filterToggleIcon: {
+    color: "#67e8f9",
+    fontSize: 14,
+    fontWeight: "bold",
+    fontFamily: "monospace",
+    position: "absolute",
+    right: 0,
+  },
+  filterRow: {
+    marginBottom: 16,
+  },
+  filterLabel: {
+    color: "#67e8f9",
+    fontSize: 13,
+    fontWeight: "bold",
+    fontFamily: "monospace",
+    marginBottom: 8,
+  },
+  sortButtons: {
+    flexDirection: "row",
+    gap: 8,
+  },
+  sortButton: {
+    flex: 1,
+    backgroundColor: "rgba(107,114,128,0.3)",
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    borderRadius: 8,
+    borderWidth: 2,
+    borderColor: "rgba(6,182,212,0.3)",
+    alignItems: "center",
+  },
+  sortButtonActive: {
+    backgroundColor: "rgba(6,182,212,0.2)",
+    borderColor: "#06b6d4",
+  },
+  sortButtonText: {
+    color: "#67e8f9",
+    fontSize: 12,
+    fontWeight: "bold",
+    fontFamily: "monospace",
+  },
+  sortButtonTextActive: {
+    color: "#06b6d4",
+  },
+  priceRangeInputs: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  priceInputWrapper: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+  },
+  priceInputLabel: {
+    color: "#67e8f9",
+    fontSize: 12,
+    fontWeight: "bold",
+    fontFamily: "monospace",
+  },
+  priceInput: {
+    flex: 1,
+    backgroundColor: "rgba(17,24,39,0.8)",
+    borderWidth: 1,
+    borderColor: "#06b6d4",
+    borderRadius: 8,
+    padding: 8,
+    color: "white",
+    fontSize: 14,
+    fontFamily: "monospace",
+    textAlign: "center",
+  },
+  priceSeparator: {
+    color: "#67e8f9",
+    fontSize: 16,
+    fontWeight: "bold",
+  },
+  resetButton: {
+    backgroundColor: "#6b7280",
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    alignItems: "center",
+    marginTop: 8,
+    borderWidth: 1,
+    borderColor: "#4b5563",
+  },
+  resetButtonText: {
+    color: "white",
+    fontSize: 12,
+    fontWeight: "bold",
     fontFamily: "monospace",
   },
   // Currency converter styles
