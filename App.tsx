@@ -91,7 +91,7 @@ function AppContent() {
   const [resultados, setResultados] = useState<GameResult[]>([]);
   const [searchNameState, setSearchNameState] = useState<string>("");
   const [loading, setLoading] = useState(false);
-  const [page, setPage] = useState<"home" | "account" | "collections">("home");
+  const [page, setPage] = useState<"home" | "account" | "collections" | "search">("home");
   const [showSearchExtras, setShowSearchExtras] = useState<boolean>(false);
   const { user } = useAuth();
 
@@ -194,6 +194,8 @@ function AppContent() {
       console.log("[SEARCH] results count:", data.resultados?.length || 0);
 
       setResultados(data.resultados || []);
+      // Navigate to home to show results
+      setPage("home");
     } catch (error) {
       console.error("Search failed:", error);
       Alert.alert("Error", "Failed to search. Check your internet connection.");
@@ -430,70 +432,16 @@ function AppContent() {
           <View style={styles.mainContent}>
             {page === "home" && (
               <>
-                {/* Centered branding */}
-                <View style={styles.homeHeaderCenter}>
-                  <Text style={styles.logo}>RETRO HUNTER</Text>
-                  <Text style={styles.tagline}>Hunt, Decide, Sell</Text>
-                </View>
-
-                {/* Centered search section - extras appear when input is focused */}
-                <View style={styles.searchWrapper}>
-                  <View style={styles.searchSectionCentered}>
-                    {/* Input stays visible; when focused we show CameraCapture and Hunt button */}
-                    <View style={styles.inputContainer}>
-                      <TextInput
-                        style={styles.input}
-                        value={nome}
-                        onChangeText={setNome}
-                        placeholder="Enter the game name..."
-                        placeholderTextColor="#67e8f9"
-                        onFocus={() => setShowSearchExtras(true)}
-                        onBlur={() => setShowSearchExtras(false)}
-                      />
-                      {nome.trim() && (
-                        <TouchableOpacity
-                          style={styles.clearButton}
-                          onPress={() => {
-                            setNome("");
-                            setResultados([]);
-                            setSearchNameState("");
-                          }}
-                        >
-                          <Text style={styles.clearButtonText}>✕</Text>
-                        </TouchableOpacity>
-                      )}
-                    </View>
-
-                    {showSearchExtras && (
-                      <>
-                        <CameraCapture onImageCaptured={handleImageCaptured} isProcessing={loading} />
-
-                        <TouchableOpacity
-                          style={[styles.searchButton, loading && styles.disabledButton]}
-                          onPress={() => searchEbayOnly()}
-                          disabled={loading || !nome.trim()}
-                        >
-                          <Text style={styles.searchButtonText}>{loading ? "🔍 SCANNING..." : "HUNT FOR PRICES"}</Text>
-                        </TouchableOpacity>
-
-                        {/* extras hide automatically on input blur */}
-                      </>
-                    )}
-
-                    {/* Show hunt button below input when game name exists but extras are collapsed */}
-                    {!showSearchExtras && nome.trim() && (
-                      <TouchableOpacity
-                        style={[styles.searchButton, loading && styles.disabledButton, { marginTop: 12 }]}
-                        onPress={() => searchEbayOnly()}
-                        disabled={loading}
-                      >
-                        <Text style={styles.searchButtonText}>{loading ? "🔍 SCANNING..." : "HUNT FOR PRICES"}</Text>
-                      </TouchableOpacity>
-                    )}
+                {/* Home page - only shows results if they exist, no search component */}
+                {resultados.length === 0 && !loading && (
+                  <View style={styles.homeWelcome}>
+                    <Text style={styles.logo}>RETRO HUNTER</Text>
+                    <Text style={styles.tagline}>Hunt, Decide, Sell</Text>
+                    <Text style={styles.welcomeText}>Click the search icon below to start hunting for game prices!</Text>
                   </View>
-                </View>
+                )}
 
-                {/* Results section matching your webapp's right panel */}
+                {/* Results section - only filters and stats, no search component */}
                 <ScrollView style={styles.resultsContainer} showsVerticalScrollIndicator={false}>
                   {resultados.length > 0 && (
                     <View style={styles.resultsSection}>
@@ -589,11 +537,11 @@ function AppContent() {
                     </View>
                   )}
 
-                  {!loading && resultados.length === 0 && nome.trim() && (
+                  {!loading && resultados.length === 0 && searchNameState && (
                     <View style={styles.noResults}>
                       <Text style={styles.noResultsTitle}>😕 NO DATA FOUND</Text>
                       <Text style={styles.noResultsText}>
-                        &gt; No results for "<Text style={styles.noResultsHighlight}>{nome}</Text>"
+                        &gt; No results for "<Text style={styles.noResultsHighlight}>{searchNameState}</Text>"
                       </Text>
                       <Text style={styles.noResultsSubtext}>Try different search terms or filters</Text>
                     </View>
@@ -602,12 +550,61 @@ function AppContent() {
               </>
             )}
 
+            {page === "search" && (
+              <View style={styles.searchPageContainer}>
+                {/* Centered branding */}
+                <View style={styles.homeHeaderCenter}>
+                  <Text style={styles.logo}>RETRO HUNTER</Text>
+                  <Text style={styles.tagline}>Hunt, Decide, Sell</Text>
+                </View>
+
+                {/* Search section */}
+                <View style={styles.searchWrapper}>
+                  <View style={styles.searchSectionCentered}>
+                    <View style={styles.inputContainer}>
+                      <TextInput
+                        style={styles.input}
+                        value={nome}
+                        onChangeText={setNome}
+                        placeholder="Enter the game name..."
+                        placeholderTextColor="#67e8f9"
+                      />
+                      {nome.trim() && (
+                        <TouchableOpacity
+                          style={styles.clearButton}
+                          onPress={() => {
+                            setNome("");
+                          }}
+                        >
+                          <Text style={styles.clearButtonText}>✕</Text>
+                        </TouchableOpacity>
+                      )}
+                    </View>
+
+                    <CameraCapture onImageCaptured={handleImageCaptured} isProcessing={loading} />
+
+                    <TouchableOpacity
+                      style={[styles.searchButton, loading && styles.disabledButton]}
+                      onPress={() => searchEbayOnly()}
+                      disabled={loading || !nome.trim()}
+                    >
+                      <Text style={styles.searchButtonText}>{loading ? "🔍 SCANNING..." : "HUNT FOR PRICES"}</Text>
+                    </TouchableOpacity>
+                  </View>
+                </View>
+              </View>
+            )}
+
             {page === "collections" && <MyCollectionsPage onBack={() => setPage("home")} />}
             {page === "account" && <MyAccount onBack={() => setPage("home")} />}
           </View>
 
           {/* Bottom menu with centered icons for Collections and Account */}
           <View style={styles.bottomMenu}>
+            <TouchableOpacity style={styles.bottomButton} onPress={() => setPage("search")}>
+              <Text style={styles.bottomIcon}>🔍</Text>
+              <Text style={styles.bottomLabel}>Search</Text>
+            </TouchableOpacity>
             <TouchableOpacity style={styles.bottomButton} onPress={() => setPage("collections")}>
               <Text style={styles.bottomIcon}>📁</Text>
               <Text style={styles.bottomLabel}>Collections</Text>
@@ -1084,4 +1081,23 @@ const styles = StyleSheet.create({
   },
   modalTitle: { color: "#67e8f9", fontSize: 16, fontWeight: "bold", marginBottom: 8 },
   modalButton: { padding: 10 },
+  // Home welcome screen styles
+  homeWelcome: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    paddingHorizontal: 32,
+  },
+  welcomeText: {
+    color: "#67e8f9",
+    fontSize: 16,
+    textAlign: "center",
+    marginTop: 24,
+    fontFamily: "monospace",
+    lineHeight: 24,
+  },
+  // Search page container
+  searchPageContainer: {
+    flex: 1,
+  },
 });
