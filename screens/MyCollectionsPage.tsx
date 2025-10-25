@@ -233,17 +233,14 @@ export default function MyCollectionsPage({ onBack }: { onBack?: () => void }) {
       <Text style={styles.price}>Paid: ${item.purchasePrice ?? "-"}</Text>
       <View style={styles.statRow}>
         <View style={[styles.statChip, styles.lowestChip]}>
-          <Text style={styles.statIcon}>⬇️</Text>
           <Text style={styles.statLabel}>Lowest</Text>
           <Text style={styles.statValue}>${item.lowestPrice ?? "-"}</Text>
         </View>
         <View style={[styles.statChip, styles.averageChip]}>
-          <Text style={styles.statIcon}>📊</Text>
           <Text style={styles.statLabel}>Avg</Text>
           <Text style={styles.statValue}>${item.averagePrice ?? "-"}</Text>
         </View>
         <View style={[styles.statChip, styles.highestChip]}>
-          <Text style={styles.statIcon}>⬆️</Text>
           <Text style={styles.statLabel}>Highest</Text>
           <Text style={styles.statValue}>${item.highestPrice ?? "-"}</Text>
         </View>
@@ -253,7 +250,6 @@ export default function MyCollectionsPage({ onBack }: { onBack?: () => void }) {
       {item.createdAt ? <Text style={styles.small}>Added: {new Date(item.createdAt).toLocaleString()}</Text> : null}
     </View>
   );
-
   return (
     <View style={styles.container}>
       <View style={styles.headerRow}>
@@ -330,33 +326,36 @@ const styles = StyleSheet.create({
   statChip: {
     flex: 1,
     alignItems: "center",
-    paddingVertical: 6,
+    paddingVertical: 8,
     paddingHorizontal: 8,
     borderRadius: 10,
     marginHorizontal: 4,
   },
   lowestChip: {
-    backgroundColor: "rgba(16,185,129,0.12)",
+    backgroundColor: "#10b981",
+    borderWidth: 1,
+    borderColor: "#059669",
   },
   averageChip: {
-    backgroundColor: "rgba(59,130,246,0.12)",
+    backgroundColor: "#3b82f6",
+    borderWidth: 1,
+    borderColor: "#2563eb",
   },
   highestChip: {
-    backgroundColor: "rgba(239,68,68,0.12)",
-  },
-  statIcon: {
-    fontSize: 14,
-    marginBottom: 2,
+    backgroundColor: "#ef4444",
+    borderWidth: 1,
+    borderColor: "#dc2626",
   },
   statLabel: {
     fontSize: 11,
-    color: "#9ca3af",
+    color: "white",
     fontFamily: "monospace",
+    fontWeight: "bold",
   },
   statValue: {
-    fontSize: 13,
+    fontSize: 14,
     fontWeight: "bold",
-    color: "#e6f7ff",
+    color: "white",
     marginTop: 2,
   },
 });

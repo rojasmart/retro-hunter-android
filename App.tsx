@@ -588,7 +588,7 @@ function AppContent() {
                       onPress={() => searchEbayOnly()}
                       disabled={loading || !nome.trim()}
                     >
-                      <Text style={styles.searchButtonText}>{loading ? "🔍 SCANNING..." : "HUNT FOR PRICES"}</Text>
+                      <Text style={styles.searchButtonText}>{loading ? "SCANNING..." : "HUNT FOR PRICES"}</Text>
                     </TouchableOpacity>
                   </View>
                 </View>
