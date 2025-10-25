@@ -164,6 +164,12 @@ function AppContent() {
     const finalSearchName = searchName ?? nome;
     setSearchNameState(finalSearchName);
 
+    console.log("[SEARCH] searchName:", finalSearchName);
+    console.log("[SEARCH] platformParam:", platformParam);
+    console.log("[SEARCH] current platform state:", platform);
+    console.log("[SEARCH] normalized platform to send:", platformToSend);
+    console.log("[SEARCH] condition:", condition);
+
     try {
       const params = new URLSearchParams({
         game_name: finalSearchName,
@@ -179,6 +185,7 @@ function AppContent() {
       console.log("[SEARCH] status:", res.status);
       const data = await res.json();
       console.log("[SEARCH] data:", data);
+      console.log("[SEARCH] results count:", data.resultados?.length || 0);
 
       setResultados(data.resultados || []);
     } catch (error) {
@@ -186,6 +193,44 @@ function AppContent() {
       Alert.alert("Error", "Failed to search. Check your internet connection.");
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Handle OCR extraction results (matching your webapp logic)
+  const handleOCRExtraction = (titles: string | string[], plataforma?: string, ebayResults?: GameResult[]) => {
+    // Build list of titles from the argument
+    let arr: string[] = [];
+    if (Array.isArray(titles)) {
+      arr = titles
+        .slice(0, 3)
+        .map((t) => t.trim())
+        .filter(Boolean);
+    } else if (typeof titles === "string" && titles.trim()) {
+      arr = [titles.trim()];
+    }
+
+    // Determine platform to use (priority: platform passed > state.platform)
+    let platformToUse: Platform = platform;
+    console.log("[handleOCRExtraction] received plataforma from OCR:", plataforma);
+    if (typeof plataforma === "string" && plataforma.trim() && plataforma.toLowerCase() !== "all") {
+      const normalized = normalizePlatform(plataforma);
+      console.log("[handleOCRExtraction] normalized plataforma:", normalized);
+      setPlatform(normalized);
+      platformToUse = normalized;
+    }
+
+    setNome(arr[0] || "");
+    setSearchNameState(arr[0] || "");
+
+    // If we already have eBay results, use them directly
+    if (ebayResults && ebayResults.length > 0) {
+      console.log("[handleOCRExtraction] Using provided eBay results:", ebayResults.length);
+      setResultados(ebayResults);
+      setLoading(false);
+    } else if (arr[0]) {
+      // Otherwise, make a normal search
+      console.log("[handleOCRExtraction] No eBay results provided, making search");
+      searchEbayOnly(arr[0], platformToUse);
     }
   };
 
@@ -210,8 +255,8 @@ function AppContent() {
       // Add the prompt parameter that your backend expects
       formData.append("prompt", "return the name and platform of this game with comma separated");
 
-      // Use FastAPI for OCR
-      const ocrUrl = `${API_BASE_URL}/ask-agent-image`;
+      // Use FastAPI for combined OCR + eBay search
+      const ocrUrl = `${API_BASE_URL}/ask-agent-image-with-ebay`;
       console.log("[OCR] posting to:", ocrUrl, "imageUri:", imageUri);
 
       const ocrResponse = await fetch(ocrUrl, {
@@ -235,18 +280,18 @@ function AppContent() {
       const data = await ocrResponse.json();
       console.log("[OCR] data:", data);
 
-      // Adapt to your backend's response format
+      // Handle the combined OCR + eBay response
       if (data.titulo && data.titulo.trim()) {
         const gameName = data.titulo;
         const detectedPlatform = data.plataforma;
+        const ebayResults = data.ebay_results || [];
 
-        setNome(gameName);
-        if (detectedPlatform) {
-          const normalizedPlatform = normalizePlatform(detectedPlatform);
-          setPlatform(normalizedPlatform);
-        }
+        console.log("[OCR] Detected game name:", gameName);
+        console.log("[OCR] Detected platform:", detectedPlatform);
+        console.log("[OCR] eBay results count:", ebayResults.length);
 
-        searchEbayOnly(gameName, detectedPlatform);
+        // Use the handleOCRExtraction logic from your webapp
+        handleOCRExtraction(gameName, detectedPlatform, ebayResults);
       } else if (data.raw) {
         // Fallback: try to parse the raw response
         const message = "Raw result: " + data.raw;
