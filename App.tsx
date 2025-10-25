@@ -457,11 +457,7 @@ function AppContent() {
                     <View style={styles.resultsSection}>
                       {/* Stats section matching your exact 3-column grid */}
                       <View style={styles.statsContainer}>
-                        <TouchableOpacity
-                          style={styles.statsHeader}
-                          onPress={() => setShowStatsExtras(!showStatsExtras)}
-                          activeOpacity={0.7}
-                        >
+                        <TouchableOpacity style={styles.statsHeader} onPress={() => setShowStatsExtras(!showStatsExtras)} activeOpacity={0.7}>
                           <Text style={styles.resultsTitle}>{searchNameState}</Text>
                           <Text style={styles.statsToggleIcon}>{showStatsExtras ? "▼" : "▶"}</Text>
                         </TouchableOpacity>
@@ -506,9 +502,7 @@ function AppContent() {
                                         style={[styles.sortButton, sortOrder === "asc" && styles.sortButtonActive]}
                                         onPress={() => setSortOrder("asc")}
                                       >
-                                        <Text style={[styles.sortButtonText, sortOrder === "asc" && styles.sortButtonTextActive]}>
-                                          ↑ Low to High
-                                        </Text>
+                                        <Text style={[styles.sortButtonText, sortOrder === "asc" && styles.sortButtonTextActive]}>↑ Low to High</Text>
                                       </TouchableOpacity>
                                       <TouchableOpacity
                                         style={[styles.sortButton, sortOrder === "desc" && styles.sortButtonActive]}
