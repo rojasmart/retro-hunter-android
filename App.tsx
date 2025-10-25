@@ -236,13 +236,14 @@ function AppContent() {
     setNome(arr[0] || "");
     setSearchNameState(arr[0] || "");
 
-    // If we already have eBay results, use them directly
+    // If we already have eBay results, use them directly and navigate to home
     if (ebayResults && ebayResults.length > 0) {
       console.log("[handleOCRExtraction] Using provided eBay results:", ebayResults.length);
       setResultados(ebayResults);
       setLoading(false);
+      setPage("home"); // Navigate to home page to show results
     } else if (arr[0]) {
-      // Otherwise, make a normal search
+      // Otherwise, make a normal search (which will navigate to home in searchEbayOnly)
       console.log("[handleOCRExtraction] No eBay results provided, making search");
       searchEbayOnly(arr[0], platformToUse);
     }
@@ -250,6 +251,9 @@ function AppContent() {
 
   const handleImageCaptured = async (imageUri: string) => {
     setLoading(true);
+    // Navigate to home page immediately to show loading state
+    setPage("home");
+
     try {
       // Ensure proper file:// prefix for Android
       let localUri = imageUri;
@@ -288,6 +292,7 @@ function AppContent() {
         console.log("[OCR] error response:", errorText);
         const message = `Server returned ${ocrResponse.status}`;
         Alert.alert("Server Error", message);
+        setLoading(false);
         return;
       }
 
@@ -310,13 +315,14 @@ function AppContent() {
         // Fallback: try to parse the raw response
         const message = "Raw result: " + data.raw;
         Alert.alert("Partial Detection", message);
+        setLoading(false);
       } else {
         Alert.alert("No Game Detected", "Could not identify any game in the image. Try a clearer photo.");
+        setLoading(false);
       }
     } catch (error) {
       console.error("OCR processing failed:", error);
       Alert.alert("Error", "Failed to process image. Please try again.");
-    } finally {
       setLoading(false);
     }
   };
