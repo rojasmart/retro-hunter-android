@@ -416,6 +416,17 @@ function AppContent() {
                         {/* extras hide automatically on input blur */}
                       </>
                     )}
+
+                    {/* Show hunt button below input when game name exists but extras are collapsed */}
+                    {!showSearchExtras && nome.trim() && (
+                      <TouchableOpacity
+                        style={[styles.searchButton, loading && styles.disabledButton, { marginTop: 12 }]}
+                        onPress={() => searchEbayOnly()}
+                        disabled={loading}
+                      >
+                        <Text style={styles.searchButtonText}>{loading ? "🔍 SCANNING..." : "HUNT FOR PRICES"}</Text>
+                      </TouchableOpacity>
+                    )}
                   </View>
                 </View>
 
