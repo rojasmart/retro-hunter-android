@@ -1260,11 +1260,13 @@ const styles = StyleSheet.create({
     paddingVertical: 20,
   },
   searchWrapper: {
+    flex: 1,
     alignItems: "center",
     justifyContent: "flex-start",
     paddingHorizontal: 20,
   },
   searchSectionCentered: {
+    flex: 1,
     width: "100%",
     maxWidth: 640,
     backgroundColor: "rgba(0,0,0,0.35)",

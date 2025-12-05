@@ -14,7 +14,7 @@ const HOST_FALLBACK = hostFromExpo || "localhost";
 let host: string;
 if (Platform.OS === "android") {
   // Emulador Android clássico usa 10.0.2.2 para apontar para localhost do host
-  host = "10.0.2.2";
+  host = "192.168.1.239";
 } else {
   host = HOST_FALLBACK;
 }
