@@ -853,24 +853,24 @@ const styles = StyleSheet.create({
   },
   resultsContainer: {
     flex: 1,
-    padding: 16,
+    padding: 10,
   },
   resultsSection: {
-    marginTop: 8,
+    marginTop: 6,
   },
   statsContainer: {
     backgroundColor: "rgba(0,0,0,0.4)",
-    borderRadius: 16,
-    padding: 20,
+    borderRadius: 8,
+    padding: 10,
     marginBottom: 24,
-    borderWidth: 2,
+    borderWidth: 1,
     borderColor: "rgba(6,182,212,0.5)",
   },
   statsHeader: {
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
-    marginBottom: 16,
+    marginBottom: 10,
     position: "relative",
   },
   resultsTitle: {
@@ -891,41 +891,34 @@ const styles = StyleSheet.create({
   },
   statsGrid: {
     flexDirection: "row",
-    gap: 12,
   },
   statCard: {
     flex: 1,
-    padding: 12,
-    borderRadius: 12,
-    alignItems: "center",
+    padding: 8,
+    alignItems: "flex-start",
   },
   lowestCard: {
     backgroundColor: "#10b981", // green-500
-    borderWidth: 1,
-    borderColor: "#059669", // green-600
+    borderTopLeftRadius: 3,
+    borderBottomLeftRadius: 3,
   },
   highestCard: {
     backgroundColor: "#ef4444", // red-500
-    borderWidth: 1,
-    borderColor: "#dc2626", // red-600
   },
   averageCard: {
     backgroundColor: "#3b82f6", // blue-500
-    borderWidth: 1,
-    borderColor: "#2563eb", // blue-600
+    borderTopRightRadius: 3,
+    borderBottomRightRadius: 3,
   },
   statLabel: {
     color: "white",
     fontSize: 10,
-    fontWeight: "bold",
+
     marginBottom: 4,
-    fontFamily: "monospace",
   },
   statValue: {
     color: "white",
-    fontSize: 16,
-    fontWeight: "bold",
-    fontFamily: "monospace",
+    fontSize: 20,
   },
   resultsGrid: {
     gap: 16,
