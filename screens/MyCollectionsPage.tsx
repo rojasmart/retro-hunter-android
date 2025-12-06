@@ -383,7 +383,6 @@ const styles = StyleSheet.create({
   statLabel: {
     fontSize: 11,
     color: "white",
-    fontFamily: "monospace",
     fontWeight: "bold",
   },
   statValue: {

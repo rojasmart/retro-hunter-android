@@ -67,12 +67,12 @@ export default function MyAccount({ onDone, onBack }: { onDone?: () => void; onB
           <Text style={styles.profileTitle}>Account Details</Text>
 
           <View style={styles.infoRow}>
-            <Text style={styles.infoLabel}>Name:</Text>
+            <Text style={styles.infoLabel}>Name</Text>
             <Text style={styles.infoValue}>{user.name || "Not set"}</Text>
           </View>
 
           <View style={styles.infoRow}>
-            <Text style={styles.infoLabel}>Email:</Text>
+            <Text style={styles.infoLabel}>Email</Text>
             <Text style={styles.infoValue}>{user.email}</Text>
           </View>
 
@@ -177,7 +177,6 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: "800",
     color: "#10b981",
-    fontFamily: "monospace",
     textAlign: "center",
     marginBottom: 8,
   },
@@ -193,7 +192,6 @@ const styles = StyleSheet.create({
     color: "#9ca3af",
     marginBottom: 24,
     textAlign: "center",
-    fontFamily: "monospace",
   },
   inputWrapper: {
     marginBottom: 16,
@@ -203,7 +201,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: "bold",
     marginBottom: 8,
-    fontFamily: "monospace",
   },
   input: {
     backgroundColor: "rgba(17,24,39,0.8)",
@@ -213,7 +210,6 @@ const styles = StyleSheet.create({
     padding: 14,
     color: "white",
     fontSize: 16,
-    fontFamily: "monospace",
   },
   button: {
     backgroundColor: "#06d447ff",
@@ -231,7 +227,6 @@ const styles = StyleSheet.create({
     color: "white",
     fontSize: 16,
     fontWeight: "bold",
-    fontFamily: "monospace",
   },
   divider: {
     flexDirection: "row",
@@ -246,13 +241,13 @@ const styles = StyleSheet.create({
   dividerText: {
     color: "#6b7280",
     paddingHorizontal: 12,
-    fontFamily: "monospace",
+
     fontWeight: "bold",
   },
   link: {
     color: "#67e8f9",
     textAlign: "center",
-    fontFamily: "monospace",
+
     fontSize: 14,
   },
   errorContainer: {
@@ -266,7 +261,6 @@ const styles = StyleSheet.create({
   errorText: {
     color: "#ef4444",
     fontSize: 14,
-    fontFamily: "monospace",
     textAlign: "center",
   },
   avatarContainer: {
@@ -284,14 +278,12 @@ const styles = StyleSheet.create({
     color: "white",
     fontSize: 32,
     fontWeight: "bold",
-    fontFamily: "monospace",
   },
   profileTitle: {
     fontSize: 20,
     fontWeight: "bold",
     color: "#67e8f9",
     marginBottom: 24,
-    fontFamily: "monospace",
   },
   infoRow: {
     width: "100%",
@@ -307,28 +299,23 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: "bold",
     marginBottom: 4,
-    fontFamily: "monospace",
   },
   infoValue: {
     color: "#67e8f9",
     fontSize: 16,
-    fontFamily: "monospace",
   },
   logoutButton: {
     backgroundColor: "#ef4444",
     paddingVertical: 14,
     paddingHorizontal: 24,
-    borderRadius: 12,
+    borderRadius: 6,
     alignItems: "center",
     marginTop: 24,
     width: "100%",
-    borderWidth: 2,
-    borderColor: "rgba(239,68,68,0.5)",
   },
   logoutButtonText: {
     color: "white",
     fontSize: 16,
     fontWeight: "bold",
-    fontFamily: "monospace",
   },
 });

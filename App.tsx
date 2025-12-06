@@ -784,13 +784,11 @@ const styles = StyleSheet.create({
     fontSize: 22,
     fontWeight: "800",
     color: "#10b981",
-    fontFamily: "monospace",
     marginTop: 6,
   },
   tagline: {
     fontSize: 11,
     color: "#9ae6ff",
-    fontFamily: "monospace",
     lineHeight: 14,
   },
   headerButtons: {
@@ -809,7 +807,6 @@ const styles = StyleSheet.create({
     color: "white",
     fontSize: 11,
     fontWeight: "bold",
-    fontFamily: "monospace",
   },
   mainContent: {
     flex: 1,
@@ -829,7 +826,6 @@ const styles = StyleSheet.create({
     color: "white",
     fontSize: 16,
     marginVertical: 2,
-    fontFamily: "monospace",
   },
   searchButton: {
     backgroundColor: "#ec4899", // pink-500
@@ -849,7 +845,6 @@ const styles = StyleSheet.create({
     color: "white",
     fontSize: 16,
     fontWeight: "bold",
-    fontFamily: "monospace",
   },
   resultsContainer: {
     flex: 1,
@@ -878,14 +873,12 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     color: "#67e8f9",
     textAlign: "center",
-    fontFamily: "monospace",
     flex: 1,
   },
   statsToggleIcon: {
     color: "#67e8f9",
     fontSize: 18,
     fontWeight: "bold",
-    fontFamily: "monospace",
     position: "absolute",
     right: 0,
   },
@@ -948,19 +941,16 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: "bold",
     marginBottom: 8,
-    fontFamily: "monospace",
   },
   gamePrice: {
     color: "#10b981", // green-400
     fontSize: 18,
     fontWeight: "bold",
     marginBottom: 4,
-    fontFamily: "monospace",
   },
   gameTag: {
     color: "#a855f7", // purple-500
     fontSize: 12,
-    fontFamily: "monospace",
   },
   noResults: {
     alignItems: "center",
@@ -975,13 +965,11 @@ const styles = StyleSheet.create({
     fontSize: 20,
     color: "#ef4444",
     marginBottom: 8,
-    fontFamily: "monospace",
   },
   noResultsText: {
     color: "#67e8f9",
     fontSize: 16,
     marginBottom: 4,
-    fontFamily: "monospace",
   },
   noResultsHighlight: {
     color: "#ec4899", // pink-400
@@ -989,7 +977,6 @@ const styles = StyleSheet.create({
   noResultsSubtext: {
     color: "#6b7280",
     fontSize: 12,
-    fontFamily: "monospace",
   },
   // Filter styles
   filtersContainer: {
@@ -1010,7 +997,6 @@ const styles = StyleSheet.create({
     color: "#67e8f9",
     fontSize: 16,
     fontWeight: "bold",
-    fontFamily: "monospace",
     flex: 1,
     textAlign: "center",
   },
@@ -1018,7 +1004,6 @@ const styles = StyleSheet.create({
     color: "#67e8f9",
     fontSize: 14,
     fontWeight: "bold",
-    fontFamily: "monospace",
     position: "absolute",
     right: 0,
   },
@@ -1029,7 +1014,6 @@ const styles = StyleSheet.create({
     color: "#67e8f9",
     fontSize: 13,
     fontWeight: "bold",
-    fontFamily: "monospace",
     marginBottom: 8,
   },
   sortButtons: {
@@ -1054,7 +1038,6 @@ const styles = StyleSheet.create({
     color: "#67e8f9",
     fontSize: 12,
     fontWeight: "bold",
-    fontFamily: "monospace",
   },
   sortButtonTextActive: {
     color: "#06b6d4",
@@ -1074,7 +1057,6 @@ const styles = StyleSheet.create({
     color: "#67e8f9",
     fontSize: 12,
     fontWeight: "bold",
-    fontFamily: "monospace",
   },
   priceInput: {
     flex: 1,
@@ -1085,7 +1067,6 @@ const styles = StyleSheet.create({
     padding: 8,
     color: "white",
     fontSize: 14,
-    fontFamily: "monospace",
     textAlign: "center",
   },
   priceSeparator: {
@@ -1107,7 +1088,6 @@ const styles = StyleSheet.create({
     color: "white",
     fontSize: 12,
     fontWeight: "bold",
-    fontFamily: "monospace",
   },
   // Currency converter styles
   currencyContainer: {
@@ -1128,7 +1108,6 @@ const styles = StyleSheet.create({
     color: "#67e8f9",
     fontSize: 14,
     fontWeight: "bold",
-    fontFamily: "monospace",
   },
   refreshButton: {
     backgroundColor: "#3b82f6",
@@ -1140,7 +1119,6 @@ const styles = StyleSheet.create({
     color: "white",
     fontSize: 12,
     fontWeight: "bold",
-    fontFamily: "monospace",
   },
   currencySelector: {
     flexDirection: "row",
@@ -1164,7 +1142,6 @@ const styles = StyleSheet.create({
     color: "#67e8f9",
     fontSize: 12,
     fontWeight: "bold",
-    fontFamily: "monospace",
   },
   currencyOptionTextActive: {
     color: "#06b6d4",
@@ -1172,7 +1149,6 @@ const styles = StyleSheet.create({
   loadingText: {
     color: "#67e8f9",
     fontSize: 10,
-    fontFamily: "monospace",
     textAlign: "center",
     marginTop: 8,
   },
@@ -1211,7 +1187,6 @@ const styles = StyleSheet.create({
     color: "white",
     fontSize: 16,
     fontWeight: "bold",
-    fontFamily: "monospace",
   },
   // Loading styles
   loadingContainer: {
@@ -1227,7 +1202,7 @@ const styles = StyleSheet.create({
     fontSize: 20,
     color: "#06b6d4",
     marginBottom: 20,
-    fontFamily: "monospace",
+
     fontWeight: "bold",
   },
   loadingBarContainer: {
@@ -1288,7 +1263,6 @@ const styles = StyleSheet.create({
     color: "#67e8f9",
     fontSize: 12,
     marginTop: 4,
-    fontFamily: "monospace",
   },
   hideExtrasButton: {
     marginTop: 8,
@@ -1299,7 +1273,6 @@ const styles = StyleSheet.create({
   hideExtrasText: {
     color: "#9ca3af",
     fontSize: 12,
-    fontFamily: "monospace",
   },
   modalBackdrop: { flex: 1, backgroundColor: "rgba(0,0,0,0.6)", justifyContent: "center", alignItems: "center" },
   modalContentSmall: {
@@ -1328,7 +1301,6 @@ const styles = StyleSheet.create({
   modalCancelButtonText: {
     color: "white",
     fontWeight: "bold",
-    fontFamily: "monospace",
   },
   modalSaveButton: {
     backgroundColor: "#10b981", // green-500
@@ -1338,14 +1310,12 @@ const styles = StyleSheet.create({
   modalSaveButtonText: {
     color: "white",
     fontWeight: "bold",
-    fontFamily: "monospace",
   },
   welcomeText: {
     color: "#67e8f9",
     fontSize: 16,
     textAlign: "center",
     marginTop: 24,
-    fontFamily: "monospace",
     lineHeight: 24,
   },
   // Search page container

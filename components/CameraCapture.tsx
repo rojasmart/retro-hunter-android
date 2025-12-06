@@ -116,7 +116,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     marginBottom: 16,
     textAlign: "center",
-    fontFamily: "monospace",
   },
   cameraContainer: {
     position: "absolute",
@@ -145,7 +144,6 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(0,0,0,0.7)",
     padding: 16,
     borderRadius: 12,
-    fontFamily: "monospace",
   },
   cameraButtonContainer: {
     position: "absolute",
@@ -218,7 +216,6 @@ const styles = StyleSheet.create({
     color: "white",
     fontSize: 16,
     fontWeight: "bold",
-    fontFamily: "monospace",
   },
   button: {
     backgroundColor: "#06b6d4",
@@ -232,6 +229,5 @@ const styles = StyleSheet.create({
     color: "white",
     fontSize: 16,
     fontWeight: "bold",
-    fontFamily: "monospace",
   },
 });
