@@ -8,7 +8,6 @@ import {
   TouchableOpacity,
   ScrollView,
   FlatList,
-  Image,
   Linking,
   Alert,
   ActivityIndicator,
@@ -432,6 +431,19 @@ function AppContent() {
     </TouchableOpacity>
   );
 
+  // Further optimize FlatList with memoization and image optimizations
+  const MemoizedRenderGameItem = React.memo(({ item, index }: { item: GameResult; index: number }) => (
+    <TouchableOpacity style={styles.fullScreenCard} onPress={() => Linking.openURL(item.link)}>
+      <Text style={styles.gameTitle} numberOfLines={2}>
+        {item.title}
+      </Text>
+      <Text style={styles.gamePrice}>
+        {getCurrencySymbol()} {convertPrice(item.price)}
+      </Text>
+      {item.tags && item.tags.length > 0 && <Text style={styles.gameTag}>{item.tags[0]}</Text>}
+    </TouchableOpacity>
+  ));
+
   return (
     <SafeAreaProvider>
       <StatusBar barStyle="light-content" backgroundColor="#111827" />
@@ -617,12 +629,21 @@ function AppContent() {
                       {/* Grid matching your md:grid-cols-2 lg:grid-cols-4 */}
                       <FlatList
                         data={filteredItems}
-                        renderItem={renderGameItem}
-                        numColumns={2} // Mobile: 2 columns (your lg:grid-cols-4 becomes 2 on mobile)
-                        key={2}
-                        columnWrapperStyle={styles.row}
+                        renderItem={({ item, index }) => <MemoizedRenderGameItem item={item} index={index} />}
+                        numColumns={1} // Display one card per row
+                        key={1}
                         contentContainerStyle={styles.resultsGrid}
-                        scrollEnabled={false}
+                        removeClippedSubviews={true} // Unmount components outside the viewport
+                        initialNumToRender={10} // Render only 10 items initially
+                        maxToRenderPerBatch={5} // Render 5 items per batch
+                        windowSize={5} // Render 5 items around the viewport
+                        getItemLayout={(data, index) => ({
+                          length: 150, // Replace with your item height
+                          offset: 150 * index,
+                          index,
+                        })} // Optimize item layout calculations
+                        keyExtractor={(item, index) => index.toString()} // Ensure unique keys
+                        nestedScrollEnabled={true} // Resolve VirtualizedLists nesting issue
                       />
                     </View>
                   )}
@@ -939,9 +960,7 @@ const styles = StyleSheet.create({
     color: "white",
     fontSize: 20,
   },
-  resultsGrid: {
-    gap: 16,
-  },
+
   row: {
     justifyContent: "space-between",
   },
@@ -949,10 +968,19 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(31,41,55,0.8)",
     borderWidth: 2,
     borderColor: "rgba(6,182,212,0.3)",
-    borderRadius: 12,
+    borderRadius: 6,
     padding: 16,
     marginBottom: 16,
     width: "48%",
+  },
+  fullScreenCard: {
+    backgroundColor: "rgba(31,41,55,0.8)",
+    borderWidth: 2,
+    borderColor: "rgba(6,182,212,0.3)",
+    borderRadius: 6,
+    padding: 16,
+    marginBottom: 8,
+    width: "100%", // Full width
   },
   gameImage: {
     width: "100%",
