@@ -636,14 +636,14 @@ function AppContent() {
                   {/* Loading State */}
                   {loading && (
                     <View style={styles.loadingContainer}>
-                      <Text style={styles.loadingTitle}>🔍 SEARCHING...</Text>
+                      <Text style={styles.loadingTitle}>SEARCHING...</Text>
                       <ActivityIndicator size="large" color="#06b6d4" style={{ marginVertical: 20 }} />
                       <View style={styles.loadingBarContainer}>
                         <View style={styles.loadingBar}>
                           <View style={styles.loadingBarFill} />
                         </View>
                       </View>
-                      <Text style={styles.loadingText}>Finding the best prices for you</Text>
+                      <Text style={styles.loadingText}>Searching for the best prices...</Text>
                     </View>
                   )}
 
