@@ -418,21 +418,6 @@ function AppContent() {
     .sort((a, b) => (sortOrder === "asc" ? a.price - b.price : b.price - a.price));
 
   const renderGameItem = ({ item, index }: { item: GameResult; index: number }) => (
-    <TouchableOpacity style={styles.gameCard} onPress={() => Linking.openURL(item.link)}>
-      {item.image && <Image source={{ uri: item.image }} style={styles.gameImage} resizeMode="cover" />}
-
-      <Text style={styles.gameTitle} numberOfLines={2}>
-        {item.title}
-      </Text>
-      <Text style={styles.gamePrice}>
-        {getCurrencySymbol()} {convertPrice(item.price)}
-      </Text>
-      {item.tags && item.tags.length > 0 && <Text style={styles.gameTag}>{item.tags[0]}</Text>}
-    </TouchableOpacity>
-  );
-
-  // Further optimize FlatList with memoization and image optimizations
-  const MemoizedRenderGameItem = React.memo(({ item, index }: { item: GameResult; index: number }) => (
     <TouchableOpacity style={styles.fullScreenCard} onPress={() => Linking.openURL(item.link)}>
       <Text style={styles.gameTitle} numberOfLines={2}>
         {item.title}
@@ -442,7 +427,7 @@ function AppContent() {
       </Text>
       {item.tags && item.tags.length > 0 && <Text style={styles.gameTag}>{item.tags[0]}</Text>}
     </TouchableOpacity>
-  ));
+  );
 
   return (
     <SafeAreaProvider>
@@ -629,7 +614,7 @@ function AppContent() {
                       {/* Grid matching your md:grid-cols-2 lg:grid-cols-4 */}
                       <FlatList
                         data={filteredItems}
-                        renderItem={({ item, index }) => <MemoizedRenderGameItem item={item} index={index} />}
+                        renderItem={renderGameItem}
                         numColumns={1} // Display one card per row
                         key={1}
                         contentContainerStyle={styles.resultsGrid}
