@@ -94,7 +94,7 @@ export default function MyAccount({ onDone, onBack }: { onDone?: () => void; onB
 
         {error && (
           <View style={styles.errorContainer}>
-            <Text style={styles.errorText}>⚠️ {error}</Text>
+            <Text style={styles.errorText}>{error}</Text>
           </View>
         )}
 
@@ -207,23 +207,21 @@ const styles = StyleSheet.create({
   },
   input: {
     backgroundColor: "rgba(17,24,39,0.8)",
-    borderWidth: 2,
+    borderWidth: 1,
     borderColor: "rgba(6,182,212,0.3)",
-    borderRadius: 12,
+    borderRadius: 6,
     padding: 14,
     color: "white",
     fontSize: 16,
     fontFamily: "monospace",
   },
   button: {
-    backgroundColor: "#06b6d4",
+    backgroundColor: "#06d447ff",
     paddingVertical: 16,
     paddingHorizontal: 24,
-    borderRadius: 12,
+    borderRadius: 6,
     alignItems: "center",
     marginTop: 8,
-    borderWidth: 2,
-    borderColor: "rgba(6,182,212,0.5)",
   },
   buttonDisabled: {
     backgroundColor: "#6b7280",
