@@ -716,10 +716,12 @@ function AppContent() {
               <MagnifyingGlassIcon size={24} color={page === "search" ? "#06b6d4" : "#67e8f9"} />
               <Text style={styles.bottomLabel}>Search</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.bottomButton} onPress={() => setPage("collections")}>
-              <FolderIcon size={24} color={page === "collections" ? "#06b6d4" : "#67e8f9"} />
-              <Text style={styles.bottomLabel}>Collections</Text>
-            </TouchableOpacity>
+            {user && (
+              <TouchableOpacity style={styles.bottomButton} onPress={() => setPage("collections")}>
+                <FolderIcon size={24} color={page === "collections" ? "#06b6d4" : "#67e8f9"} />
+                <Text style={styles.bottomLabel}>Collections</Text>
+              </TouchableOpacity>
+            )}
             <TouchableOpacity style={styles.bottomButton} onPress={() => setPage("account")}>
               <UserIcon size={24} color={page === "account" ? "#06b6d4" : "#67e8f9"} />
               <Text style={styles.bottomLabel}>Account</Text>
