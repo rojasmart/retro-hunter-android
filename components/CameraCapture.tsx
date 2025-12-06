@@ -199,10 +199,9 @@ const styles = StyleSheet.create({
   actionButton: {
     paddingVertical: 16,
     paddingHorizontal: 24,
-    borderRadius: 12,
+    borderRadius: 6,
     marginVertical: 8,
     alignItems: "center",
-    borderWidth: 2,
   },
   cameraButton: {
     backgroundColor: "#06b6d4",
@@ -221,9 +220,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#06b6d4",
     paddingHorizontal: 20,
     paddingVertical: 12,
-    borderRadius: 12,
-    borderWidth: 2,
-    borderColor: "rgba(6,182,212,0.5)",
+    borderRadius: 6,
   },
   buttonText: {
     color: "white",

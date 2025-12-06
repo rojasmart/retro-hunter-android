@@ -445,7 +445,14 @@ function AppContent() {
                 {/* Home page - only shows results if they exist, no search component */}
                 {resultados.length === 0 && !loading && (
                   <View style={styles.homeWelcome}>
-                    <Text style={styles.logo}>RETRO HUNTER</Text>
+                    <LinearGradient
+                      colors={["#34d399", "#ec4899", "#a855f7"]} // Gradiente: verde, rosa, roxo
+                      start={{ x: 0, y: 0 }}
+                      end={{ x: 1, y: 0 }}
+                      style={styles.logoGradient}
+                    >
+                      <Text style={styles.logoText}>RETRO HUNTER</Text>
+                    </LinearGradient>
                     <Text style={styles.tagline}>Hunt, Decide, Sell</Text>
                     <Text style={styles.welcomeText}>Click the search icon below to start hunting for game prices!</Text>
                   </View>
@@ -651,7 +658,14 @@ function AppContent() {
               <View style={styles.searchPageContainer}>
                 {/* Centered branding */}
                 <View style={styles.homeHeaderCenter}>
-                  <Text style={styles.logo}>RETRO HUNTER</Text>
+                  <LinearGradient
+                    colors={["#34d399", "#ec4899", "#a855f7"]} // Gradiente: verde, rosa, roxo
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 0 }}
+                    style={styles.logoGradient}
+                  >
+                    <Text style={styles.logoText}>RETRO HUNTER</Text>
+                  </LinearGradient>
                   <Text style={styles.tagline}>Hunt, Decide, Sell</Text>
                 </View>
 
@@ -786,10 +800,22 @@ const styles = StyleSheet.create({
     color: "#10b981",
     marginTop: 6,
   },
+  logoGradient: {
+    paddingHorizontal: 8,
+    borderRadius: 6,
+  },
+  logoText: {
+    fontSize: 22, // text-2xl
+    fontWeight: "bold", // font-bold
+    textAlign: "center",
+    color: "transparent", // Necessário para o gradiente
+    backgroundColor: "transparent",
+  },
   tagline: {
     fontSize: 11,
     color: "#9ae6ff",
-    lineHeight: 14,
+
+    marginTop: 14,
   },
   headerButtons: {
     flexDirection: "row",
@@ -819,10 +845,10 @@ const styles = StyleSheet.create({
   },
   input: {
     backgroundColor: "rgba(17,24,39,0.8)",
-    borderWidth: 2,
+    borderWidth: 1,
     borderColor: "#06b6d4",
-    borderRadius: 12,
-    padding: 10,
+    borderRadius: 6,
+    padding: 16,
     color: "white",
     fontSize: 16,
     marginVertical: 2,
@@ -832,10 +858,8 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
     paddingHorizontal: 16,
     marginTop: -12,
-    borderRadius: 12,
+    borderRadius: 6,
     alignItems: "center",
-    borderWidth: 2,
-    borderColor: "rgba(236,72,153,0.5)",
   },
   disabledButton: {
     backgroundColor: "#6b7280",
@@ -1078,11 +1102,9 @@ const styles = StyleSheet.create({
     backgroundColor: "#6b7280",
     paddingVertical: 10,
     paddingHorizontal: 16,
-    borderRadius: 8,
+    borderRadius: 4,
     alignItems: "center",
     marginTop: 8,
-    borderWidth: 1,
-    borderColor: "#4b5563",
   },
   resetButtonText: {
     color: "white",
@@ -1113,7 +1135,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#3b82f6",
     paddingHorizontal: 12,
     paddingVertical: 6,
-    borderRadius: 8,
+    borderRadius: 3,
   },
   refreshButtonText: {
     color: "white",
@@ -1175,13 +1197,11 @@ const styles = StyleSheet.create({
   // Collection button styles
   collectionButton: {
     backgroundColor: "#f59e0b", // amber-500
-    paddingVertical: 10,
+    paddingVertical: 18,
     paddingHorizontal: 16,
-    borderRadius: 12,
+    borderRadius: 6,
     alignItems: "center",
     marginTop: 16,
-    borderWidth: 2,
-    borderColor: "rgba(245,158,11,0.5)",
   },
   collectionButtonText: {
     color: "white",
@@ -1225,13 +1245,11 @@ const styles = StyleSheet.create({
   homeHeaderCenter: {
     alignItems: "center",
     justifyContent: "center",
-    paddingVertical: 20,
+    paddingVertical: 90,
   },
   searchWrapper: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "flex-start",
     paddingHorizontal: 20,
+    height: "50%",
   },
   searchSectionCentered: {
     flex: 1,
@@ -1239,7 +1257,7 @@ const styles = StyleSheet.create({
     maxWidth: 640,
     backgroundColor: "rgba(0,0,0,0.35)",
     padding: 16,
-    borderRadius: 12,
+    borderRadius: 6,
     borderWidth: 1,
     borderColor: "rgba(6,182,212,0.25)",
   },

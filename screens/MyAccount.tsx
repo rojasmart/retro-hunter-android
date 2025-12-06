@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator, Alert } from "react-native";
 import { useAuth } from "../context/AuthContext";
 
+import { LinearGradient } from "expo-linear-gradient";
+
 export default function MyAccount({ onDone, onBack }: { onDone?: () => void; onBack?: () => void }) {
   const { login, register, logout, user, error, clearError } = useAuth();
   const [email, setEmail] = useState("");
@@ -88,7 +90,15 @@ export default function MyAccount({ onDone, onBack }: { onDone?: () => void; onB
   return (
     <View style={styles.container}>
       <View style={styles.formCard}>
-        <Text style={styles.logo}>RETRO HUNTER</Text>
+        <LinearGradient
+          colors={["#34d399", "#ec4899", "#a855f7"]} // Gradiente: verde, rosa, roxo
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 0 }}
+          style={styles.logoGradient}
+        >
+          <Text style={styles.logoText}>RETRO HUNTER</Text>
+        </LinearGradient>
+
         <Text style={styles.formTitle}>{isRegister ? "Create Account" : "Welcome Back"}</Text>
         <Text style={styles.formSubtitle}>{isRegister ? "Join the hunt for retro games" : "Login to your account"}</Text>
 
@@ -173,18 +183,23 @@ const styles = StyleSheet.create({
     borderColor: "rgba(6,182,212,0.3)",
     alignItems: "center",
   },
-  logo: {
-    fontSize: 24,
-    fontWeight: "800",
-    color: "#10b981",
-    textAlign: "center",
-    marginBottom: 8,
+  logoGradient: {
+    borderRadius: 6,
   },
+  logoText: {
+    fontSize: 26, // text-2xl
+    fontWeight: "bold", // font-bold
+    textAlign: "center",
+    color: "transparent", // Necessário para o gradiente
+    backgroundColor: "transparent",
+  },
+
   formTitle: {
     fontSize: 24,
     fontWeight: "bold",
     color: "#67e8f9",
     marginBottom: 4,
+    marginTop: 16,
     textAlign: "center",
   },
   formSubtitle: {
@@ -212,7 +227,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   button: {
-    backgroundColor: "#06d447ff",
+    backgroundColor: "#34d399",
     paddingVertical: 16,
     paddingHorizontal: 24,
     borderRadius: 6,
