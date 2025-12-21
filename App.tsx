@@ -15,12 +15,34 @@ import styles from "./App.styles";
 
 import { MagnifyingGlassIcon, FolderIcon, UserIcon } from "react-native-heroicons/outline";
 
+interface PriceData {
+  id: string;
+  product_name: string;
+  console_name: string;
+  genre?: string;
+  release_date?: string;
+  prices: {
+    loose?: number;
+    cib?: number;
+    new?: number;
+    graded?: number;
+    box_only?: number;
+  };
+  currency: string;
+}
+
 interface GameResult {
   title: string;
   price: number;
   link: string;
   image?: string;
   tags?: string[];
+}
+
+interface PriceCard {
+  type: string;
+  price: number;
+  label: string;
 }
 
 // Platform types matching your webapp
@@ -79,6 +101,7 @@ function AppContent() {
   const [detectedPlatformName, setDetectedPlatformName] = useState<string>(""); // Store original OCR platform name
   const [condition, setCondition] = useState<string>("all");
   const [resultados, setResultados] = useState<GameResult[]>([]);
+  const [priceData, setPriceData] = useState<PriceData | null>(null);
   const [searchNameState, setSearchNameState] = useState<string>("");
   const [loading, setLoading] = useState(false);
   const [page, setPage] = useState<"home" | "account" | "collections" | "search">("home");
@@ -245,8 +268,8 @@ function AppContent() {
       // Add the prompt parameter that your backend expects
       formData.append("prompt", "return the name and platform of this game with comma separated");
 
-      // Use FastAPI for combined OCR + eBay search
-      const ocrUrl = `${API_BASE_URL}/ask-agent-image-with-ebay`;
+      // Use FastAPI for combined OCR + Price search
+      const ocrUrl = `${API_BASE_URL}/ask-agent-image-with-prices`;
 
       const ocrResponse = await fetch(ocrUrl, {
         method: "POST",
@@ -266,21 +289,40 @@ function AppContent() {
       }
 
       const data = await ocrResponse.json();
+      console.log("[OCR] Received data:", JSON.stringify(data, null, 2));
 
-      // Handle the combined OCR + eBay response
-      if (data.titulo && data.titulo.trim()) {
+      // Handle the combined OCR + Price response
+      if (data.price_data && data.price_data.length > 0) {
+        console.log("[OCR] Found price_data:", data.price_data.length, "items");
+        const firstPriceData = data.price_data[0];
+        console.log("[OCR] Setting price data:", firstPriceData.product_name);
+        console.log("[OCR] Prices:", firstPriceData.prices);
+        setPriceData(firstPriceData);
+        setSearchNameState(firstPriceData.product_name);
+        setLoading(false);
+        setPage("home");
+        console.log("[OCR] Navigation to home complete");
+      } else if (data.games && data.games.length > 0) {
+        console.log("[OCR] Found games:", data.games);
+        // Fallback: show the detected games
+        const gamesList = data.games.map((g: any) => `${g.title} (${g.platform})`).join(", ");
+        Alert.alert("Games Detected", `Found: ${gamesList}\n\nBut no price data available.`);
+        setLoading(false);
+      } else if (data.titulo && data.titulo.trim()) {
+        console.log("[OCR] Using titulo fallback");
         const gameName = data.titulo;
         const detectedPlatform = data.plataforma;
-        const ebayResults = data.ebay_results || [];
+        const priceResults = data.price_results || [];
 
-        // Use the handleOCRExtraction logic from your webapp
-        handleOCRExtraction(gameName, detectedPlatform, ebayResults);
+        // Use the handleOCRExtraction logic
+        handleOCRExtraction(gameName, detectedPlatform, priceResults);
       } else if (data.raw) {
         // Fallback: try to parse the raw response
         const message = "Raw result: " + data.raw;
         Alert.alert("Partial Detection", message);
         setLoading(false);
       } else {
+        console.log("[OCR] No valid data found in response");
         Alert.alert("No Game Detected", "Could not identify any game in the image. Try a clearer photo.");
         setLoading(false);
       }
@@ -398,7 +440,7 @@ function AppContent() {
             {page === "home" && (
               <>
                 {/* Home page - only shows results if they exist, no search component */}
-                {resultados.length === 0 && !loading && (
+                {!priceData && resultados.length === 0 && !loading && (
                   <View style={styles.homeWelcome}>
                     <LinearGradient
                       colors={["#34d399", "#ec4899", "#a855f7"]} // Gradiente: verde, rosa, roxo
@@ -413,8 +455,57 @@ function AppContent() {
                   </View>
                 )}
 
-                {/* Results section - only filters and stats, no search component */}
+                {/* Results section - Price Data Cards */}
                 <ScrollView style={styles.resultsContainer} showsVerticalScrollIndicator={false}>
+                  {priceData && (
+                    <View style={styles.resultsSection}>
+                      <View style={styles.statsContainer}>
+                        <TouchableOpacity style={styles.statsHeader} onPress={() => setShowStatsExtras(!showStatsExtras)} activeOpacity={0.7}>
+                          <Text style={styles.resultsTitle}>{priceData.product_name}</Text>
+                          <Text style={styles.statsToggleIcon}>{showStatsExtras ? "▼" : "▶"}</Text>
+                        </TouchableOpacity>
+
+                        <Text style={styles.consoleText}>{priceData.console_name}</Text>
+                        {priceData.genre && <Text style={styles.genreText}>Genre: {priceData.genre}</Text>}
+                        {priceData.release_date && <Text style={styles.releaseDateText}>Released: {priceData.release_date}</Text>}
+
+                        {/* Price Cards Grid */}
+                        <View style={styles.priceCardsContainer}>
+                          {priceData.prices.loose && (
+                            <View style={[styles.priceCard, styles.looseCard]}>
+                              <Text style={styles.priceCardLabel}>LOOSE</Text>
+                              <Text style={styles.priceCardValue}>${priceData.prices.loose.toFixed(2)}</Text>
+                            </View>
+                          )}
+                          {priceData.prices.cib && (
+                            <View style={[styles.priceCard, styles.cibCard]}>
+                              <Text style={styles.priceCardLabel}>CIB</Text>
+                              <Text style={styles.priceCardValue}>${priceData.prices.cib.toFixed(2)}</Text>
+                            </View>
+                          )}
+                          {priceData.prices.new && (
+                            <View style={[styles.priceCard, styles.newCard]}>
+                              <Text style={styles.priceCardLabel}>NEW</Text>
+                              <Text style={styles.priceCardValue}>${priceData.prices.new.toFixed(2)}</Text>
+                            </View>
+                          )}
+                          {priceData.prices.graded && (
+                            <View style={[styles.priceCard, styles.gradedCard]}>
+                              <Text style={styles.priceCardLabel}>GRADED</Text>
+                              <Text style={styles.priceCardValue}>${priceData.prices.graded.toFixed(2)}</Text>
+                            </View>
+                          )}
+                          {priceData.prices.box_only && (
+                            <View style={[styles.priceCard, styles.boxOnlyCard]}>
+                              <Text style={styles.priceCardLabel}>BOX ONLY</Text>
+                              <Text style={styles.priceCardValue}>${priceData.prices.box_only.toFixed(2)}</Text>
+                            </View>
+                          )}
+                        </View>
+                      </View>
+                    </View>
+                  )}
+
                   {resultados.length > 0 && (
                     <View style={styles.resultsSection}>
                       {/* Stats section matching your exact 3-column grid */}

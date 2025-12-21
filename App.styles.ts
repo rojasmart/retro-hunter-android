@@ -572,6 +572,68 @@ const styles = StyleSheet.create({
   searchPageContainer: {
     flex: 1,
   },
+  // Price Data Styles
+  consoleText: {
+    color: "#67e8f9",
+    fontSize: 14,
+    textAlign: "center",
+    marginTop: 8,
+    fontWeight: "600",
+  },
+  genreText: {
+    color: "#9ca3af",
+    fontSize: 12,
+    textAlign: "center",
+    marginTop: 4,
+  },
+  releaseDateText: {
+    color: "#9ca3af",
+    fontSize: 12,
+    textAlign: "center",
+    marginTop: 2,
+  },
+  priceCardsContainer: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "space-between",
+    marginTop: 16,
+    gap: 12,
+  },
+  priceCard: {
+    width: "48%",
+    padding: 16,
+    borderRadius: 8,
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 12,
+  },
+  looseCard: {
+    backgroundColor: "#0ea5e9", // blue-500
+  },
+  cibCard: {
+    backgroundColor: "#8b5cf6", // violet-500
+  },
+  newCard: {
+    backgroundColor: "#10b981", // green-500
+  },
+  gradedCard: {
+    backgroundColor: "#f59e0b", // amber-500
+  },
+  boxOnlyCard: {
+    backgroundColor: "#ec4899", // pink-500
+  },
+  priceCardLabel: {
+    color: "white",
+    fontSize: 12,
+    fontWeight: "bold",
+    marginBottom: 8,
+    letterSpacing: 1,
+  },
+  priceCardValue: {
+    color: "white",
+    fontSize: 24,
+    fontWeight: "bold",
+  },
 });
 
 
