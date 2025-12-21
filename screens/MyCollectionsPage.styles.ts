@@ -64,52 +64,31 @@ const styles = StyleSheet.create({
   priceGrid: {
     flexDirection: "row",
     flexWrap: "wrap",
-    gap: 8,
+    justifyContent: "space-between",
     marginTop: 8,
   },
   statChip: {
-    flex: 1,
+    width: "48%", // Garante exatamente 2 colunas (48% x 2 + gap)
     alignItems: "flex-start",
     paddingVertical: 8,
     paddingHorizontal: 8,
-  },
-  lowestChip: {
-    backgroundColor: "#10b981",
-    borderTopLeftRadius: 3,
-    borderBottomLeftRadius: 3,
+    marginBottom: 8,
   },
   looseChip: {
     backgroundColor: "#0ea5e9", // blue-500
     borderRadius: 3,
-    minWidth: "48%",
   },
   cibChip: {
     backgroundColor: "#8b5cf6", // violet-500
     borderRadius: 3,
-    minWidth: "48%",
   },
   newChip: {
     backgroundColor: "#10b981", // green-500
     borderRadius: 3,
-    minWidth: "48%",
   },
   gradedChip: {
     backgroundColor: "#f59e0b", // amber-500
     borderRadius: 3,
-    minWidth: "48%",
-  },
-  boxOnlyChip: {
-    backgroundColor: "#ec4899", // pink-500
-    borderRadius: 3,
-    minWidth: "48%",
-  },
-  averageChip: {
-    backgroundColor: "#3b82f6",
-  },
-  highestChip: {
-    backgroundColor: "#ef4444",
-    borderTopRightRadius: 3,
-    borderBottomRightRadius: 3,
   },
   statLabel: {
     fontSize: 11,
