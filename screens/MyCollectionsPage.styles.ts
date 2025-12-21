@@ -61,6 +61,12 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     marginTop: 8,
   },
+  priceGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 8,
+    marginTop: 8,
+  },
   statChip: {
     flex: 1,
     alignItems: "flex-start",
@@ -71,6 +77,31 @@ const styles = StyleSheet.create({
     backgroundColor: "#10b981",
     borderTopLeftRadius: 3,
     borderBottomLeftRadius: 3,
+  },
+  looseChip: {
+    backgroundColor: "#0ea5e9", // blue-500
+    borderRadius: 3,
+    minWidth: "48%",
+  },
+  cibChip: {
+    backgroundColor: "#8b5cf6", // violet-500
+    borderRadius: 3,
+    minWidth: "48%",
+  },
+  newChip: {
+    backgroundColor: "#10b981", // green-500
+    borderRadius: 3,
+    minWidth: "48%",
+  },
+  gradedChip: {
+    backgroundColor: "#f59e0b", // amber-500
+    borderRadius: 3,
+    minWidth: "48%",
+  },
+  boxOnlyChip: {
+    backgroundColor: "#ec4899", // pink-500
+    borderRadius: 3,
+    minWidth: "48%",
   },
   averageChip: {
     backgroundColor: "#3b82f6",
@@ -89,6 +120,18 @@ const styles = StyleSheet.create({
     fontSize: 18,
     color: "white",
     marginTop: 2,
+  },
+  deleteButton: {
+    backgroundColor: "#ef4444",
+    padding: 8,
+    borderRadius: 6,
+    alignItems: "center",
+    marginTop: 12,
+  },
+  deleteButtonText: {
+    color: "white",
+    fontSize: 12,
+    fontWeight: "bold",
   },
 });
 

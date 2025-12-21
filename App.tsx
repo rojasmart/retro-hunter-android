@@ -355,20 +355,35 @@ function AppContent() {
       // Use original detected platform name if available, otherwise use normalized platform
       const platformForCollection = detectedPlatformName || (platform !== "all" ? platform : "");
 
+      // Build body with price data if available
       const body: any = {
         gameTitle: (searchNameState && searchNameState.trim()) || nome || "",
         platform: platformForCollection,
         condition: addConditionInput || undefined,
         purchasePrice: typeof priceNum === "number" ? priceNum : undefined,
-        lowestPrice: lowestPrice || undefined,
-        highestPrice: highestPrice || undefined,
-        averagePrice: Number(averagePrice) || undefined,
         notes: "",
         images: [],
         isWishlist: false,
         completionStatus: "not-started",
         userId: uid,
       };
+
+      // Add price data from PriceCharting if available
+      if (priceData && priceData.prices) {
+        body.loosePrice = priceData.prices.loose || undefined;
+        body.cibPrice = priceData.prices.cib || undefined;
+        body.newPrice = priceData.prices.new || undefined;
+        body.gradedPrice = priceData.prices.graded || undefined;
+        body.boxOnlyPrice = priceData.prices.box_only || undefined;
+        body.priceChartingId = priceData.id || undefined;
+        body.genre = priceData.genre || undefined;
+        body.releaseDate = priceData.release_date || undefined;
+      } else {
+        // Fallback to old prices if using old search results
+        body.lowestPrice = lowestPrice || undefined;
+        body.highestPrice = highestPrice || undefined;
+        body.averagePrice = Number(averagePrice) || undefined;
+      }
 
       const postCandidates = [`${AUTH_BASE_URL}/gameincollections`, `${AUTH_BASE_URL}/collection`];
       let posted = false;
@@ -502,6 +517,19 @@ function AppContent() {
                             </View>
                           )}
                         </View>
+
+                        {/* Add to Collection Button */}
+                        <TouchableOpacity
+                          style={styles.collectionButton}
+                          onPress={() => {
+                            // Open modal to collect purchase price and optional condition
+                            setPurchasePriceInput("");
+                            setAddConditionInput("used");
+                            setIsAddModalVisible(true);
+                          }}
+                        >
+                          <Text style={styles.collectionButtonText}>ADD TO COLLECTION</Text>
+                        </TouchableOpacity>
                       </View>
                     </View>
                   )}
@@ -696,7 +724,7 @@ function AppContent() {
                     </View>
                   )}
 
-                  {!loading && resultados.length === 0 && searchNameState && (
+                  {!loading && !priceData && resultados.length === 0 && searchNameState && (
                     <View style={styles.noResults}>
                       <Text style={styles.noResultsTitle}>😕 NO DATA FOUND</Text>
                       <Text style={styles.noResultsText}>

@@ -12,9 +12,19 @@ interface Item {
   platform: string;
   condition?: string;
   purchasePrice?: number;
+  // Old price fields (for backward compatibility)
   lowestPrice?: number;
   highestPrice?: number;
   averagePrice?: number;
+  // New PriceCharting fields
+  loosePrice?: number;
+  cibPrice?: number;
+  newPrice?: number;
+  gradedPrice?: number;
+  boxOnlyPrice?: number;
+  priceChartingId?: string;
+  genre?: string;
+  releaseDate?: string;
   notes?: string;
   images?: string[];
   createdAt?: string;
@@ -226,43 +236,101 @@ export default function MyCollectionsPage({ onBack }: { onBack?: () => void }) {
     }
   };
 
-  const renderItem = ({ item }: { item: Item }) => (
-    <View style={styles.card}>
-      {/* Top row: Title/Platform on left, Paid price on right */}
-      <View style={styles.cardTopRow}>
-        <View style={styles.cardLeft}>
-          <Text style={styles.title}>{item.gameTitle}</Text>
-          <Text style={styles.meta}>
-            {item.platform} {item.condition ? `• ${item.condition}` : ""}
-          </Text>
-          {item.createdAt ? <Text style={styles.small}>{new Date(item.createdAt).toLocaleDateString()}</Text> : null}
-        </View>
-        <View style={styles.cardRight}>
-          <Text style={styles.paidLabel}>PAID</Text>
-          <Text style={styles.paidPrice}>${item.purchasePrice ?? "-"}</Text>
-        </View>
-      </View>
+  const renderItem = ({ item }: { item: Item }) => {
+    // Check if we have new PriceCharting data
+    const hasNewPrices = !!(item.loosePrice || item.cibPrice || item.newPrice || item.gradedPrice || item.boxOnlyPrice);
 
-      {/* Price stats row */}
-      <View style={styles.statRow}>
-        <View style={[styles.statChip, styles.lowestChip]}>
-          <Text style={styles.statLabel}>Lowest</Text>
-          <Text style={styles.statValue}>${item.lowestPrice ?? "-"}</Text>
-        </View>
-        <View style={[styles.statChip, styles.averageChip]}>
-          <Text style={styles.statLabel}>Avg</Text>
-          <Text style={styles.statValue}>${item.averagePrice ?? "-"}</Text>
-        </View>
-        <View style={[styles.statChip, styles.highestChip]}>
-          <Text style={styles.statLabel}>Highest</Text>
-          <Text style={styles.statValue}>${item.highestPrice ?? "-"}</Text>
-        </View>
-      </View>
+    // Debug: Log the item to see what prices we have
+    console.log("Rendering item:", item.gameTitle, {
+      loosePrice: item.loosePrice,
+      cibPrice: item.cibPrice,
+      newPrice: item.newPrice,
+      gradedPrice: item.gradedPrice,
+      boxOnlyPrice: item.boxOnlyPrice,
+      hasNewPrices,
+    });
 
-      {/* Notes if available */}
-      {item.notes ? <Text style={styles.notes}>Notes: {item.notes}</Text> : null}
-    </View>
-  );
+    return (
+      <View style={styles.card}>
+        {/* Top row: Title/Platform on left, Paid price on right */}
+        <View style={styles.cardTopRow}>
+          <View style={styles.cardLeft}>
+            <Text style={styles.title}>{item.gameTitle}</Text>
+            <Text style={styles.meta}>
+              {item.platform} {item.condition ? `• ${item.condition}` : ""}
+            </Text>
+            {item.genre && <Text style={styles.small}>Genre: {item.genre}</Text>}
+            {item.createdAt ? <Text style={styles.small}>{new Date(item.createdAt).toLocaleDateString()}</Text> : null}
+          </View>
+          <View style={styles.cardRight}>
+            <Text style={styles.paidLabel}>PAID</Text>
+            <Text style={styles.paidPrice}>${item.purchasePrice ?? "-"}</Text>
+          </View>
+        </View>
+
+        {/* Price stats row - Show new prices if available, otherwise show old */}
+        {hasNewPrices ? (
+          <View style={styles.priceGrid}>
+            {item.loosePrice && (
+              <View style={[styles.statChip, styles.looseChip]}>
+                <Text style={styles.statLabel}>Loose</Text>
+                <Text style={styles.statValue}>${item.loosePrice.toFixed(2)}</Text>
+              </View>
+            )}
+            {item.cibPrice && (
+              <View style={[styles.statChip, styles.cibChip]}>
+                <Text style={styles.statLabel}>CIB</Text>
+                <Text style={styles.statValue}>${item.cibPrice.toFixed(2)}</Text>
+              </View>
+            )}
+            {item.newPrice && (
+              <View style={[styles.statChip, styles.newChip]}>
+                <Text style={styles.statLabel}>New</Text>
+                <Text style={styles.statValue}>${item.newPrice.toFixed(2)}</Text>
+              </View>
+            )}
+            {item.gradedPrice && (
+              <View style={[styles.statChip, styles.gradedChip]}>
+                <Text style={styles.statLabel}>Graded</Text>
+                <Text style={styles.statValue}>${item.gradedPrice.toFixed(2)}</Text>
+              </View>
+            )}
+          </View>
+        ) : (
+          <View style={styles.statRow}>
+            <View style={[styles.statChip, styles.lowestChip]}>
+              <Text style={styles.statLabel}>Lowest</Text>
+              <Text style={styles.statValue}>${item.lowestPrice ?? "-"}</Text>
+            </View>
+            <View style={[styles.statChip, styles.averageChip]}>
+              <Text style={styles.statLabel}>Avg</Text>
+              <Text style={styles.statValue}>${item.averagePrice ?? "-"}</Text>
+            </View>
+            <View style={[styles.statChip, styles.highestChip]}>
+              <Text style={styles.statLabel}>Highest</Text>
+              <Text style={styles.statValue}>${item.highestPrice ?? "-"}</Text>
+            </View>
+          </View>
+        )}
+
+        {/* Notes if available */}
+        {item.notes ? <Text style={styles.notes}>Notes: {item.notes}</Text> : null}
+
+        {/* Delete button */}
+        <TouchableOpacity
+          style={styles.deleteButton}
+          onPress={() =>
+            Alert.alert("Delete", `Remove "${item.gameTitle}"?`, [
+              { text: "Cancel", style: "cancel" },
+              { text: "Delete", style: "destructive", onPress: () => removeItem(item._id) },
+            ])
+          }
+        >
+          <Text style={styles.deleteButtonText}>Delete</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  };
   return (
     <View style={styles.container}>
       <View style={styles.headerRow}>

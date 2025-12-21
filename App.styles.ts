@@ -572,6 +572,10 @@ const styles = StyleSheet.create({
   searchPageContainer: {
     flex: 1,
   },
+  // Results grid for FlatList
+  resultsGrid: {
+    paddingBottom: 16,
+  },
   // Price Data Styles
   consoleText: {
     color: "#67e8f9",
