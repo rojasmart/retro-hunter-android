@@ -130,7 +130,17 @@ export default function MyCollectionsPage({ onBack }: { onBack?: () => void }) {
           if (!it) return false;
           return (it.userId ?? it.user ?? it.userid ?? it.user_id) === uid;
         });
-        setItems(filtered);
+
+        // Map backend field names to frontend field names
+        const mappedItems = filtered.map((item: any) => ({
+          ...item,
+          // Backend saves as completePrice, we display as cibPrice
+          cibPrice: item.cibPrice ?? item.completePrice,
+          // Backend might not save boxOnlyPrice at all, so it stays undefined
+          boxOnlyPrice: item.boxOnlyPrice ?? item.boxPrice,
+        }));
+
+        setItems(mappedItems);
       } else {
         setItems(Array.isArray(list) ? list : []);
       }

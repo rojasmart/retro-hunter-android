@@ -353,7 +353,14 @@ function AppContent() {
       const token = await AsyncStorage.getItem("auth_token");
 
       // Use original detected platform name if available, otherwise use normalized platform
-      const platformForCollection = detectedPlatformName || (platform !== "all" ? platform : "");
+      const platformForCollection = priceData?.console_name || detectedPlatformName || (platform !== "all" ? platform : "");
+
+      console.log("[ADD] Platform sources:", {
+        "priceData?.console_name": priceData?.console_name,
+        detectedPlatformName,
+        platform,
+        platformForCollection,
+      });
 
       // Build body with price data if available
       const body: any = {
@@ -370,14 +377,18 @@ function AppContent() {
 
       // Add price data from PriceCharting if available
       if (priceData && priceData.prices) {
+        console.log("[ADD] priceData.prices:", JSON.stringify(priceData.prices, null, 2));
         body.loosePrice = priceData.prices.loose || undefined;
         body.cibPrice = priceData.prices.cib || undefined;
+        body.completePrice = priceData.prices.cib || undefined; // Backend expects completePrice for CIB
         body.newPrice = priceData.prices.new || undefined;
         body.gradedPrice = priceData.prices.graded || undefined;
         body.boxOnlyPrice = priceData.prices.box_only || undefined;
+        body.boxPrice = priceData.prices.box_only || undefined; // Backend might expect boxPrice
         body.priceChartingId = priceData.id || undefined;
         body.genre = priceData.genre || undefined;
         body.releaseDate = priceData.release_date || undefined;
+        console.log("[ADD] body with prices:", JSON.stringify(body, null, 2));
       } else {
         // Fallback to old prices if using old search results
         body.lowestPrice = lowestPrice || undefined;

@@ -90,6 +90,19 @@ const styles = StyleSheet.create({
     backgroundColor: "#f59e0b", // amber-500
     borderRadius: 3,
   },
+  lowestChip: {
+    backgroundColor: "#10b981",
+    borderTopLeftRadius: 3,
+    borderBottomLeftRadius: 3,
+  },
+  averageChip: {
+    backgroundColor: "#3b82f6",
+  },
+  highestChip: {
+    backgroundColor: "#ef4444",
+    borderTopRightRadius: 3,
+    borderBottomRightRadius: 3,
+  },
   statLabel: {
     fontSize: 11,
     color: "white",
