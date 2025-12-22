@@ -81,16 +81,16 @@ const styles = StyleSheet.create({
     borderColor: "rgba(96, 165, 250, 0.5)", // blue-400/50
   },
   cibChip: {
-    backgroundColor: "rgba(76, 29, 149, 0.4)", // violet-900/40
-    borderColor: "rgba(167, 139, 250, 0.5)", // violet-400/50
-  },
-  newChip: {
     backgroundColor: "rgba(6, 78, 59, 0.4)", // green-900/40
     borderColor: "rgba(52, 211, 153, 0.5)", // green-400/50
   },
+  newChip: {
+    backgroundColor: "rgba(76, 29, 149, 0.4)", // purple-900/40
+    borderColor: "rgba(167, 139, 250, 0.5)", // purple-400/50
+  },
   gradedChip: {
-    backgroundColor: "rgba(120, 53, 15, 0.4)", // amber-900/40
-    borderColor: "rgba(251, 191, 36, 0.5)", // amber-400/50
+    backgroundColor: "rgba(120, 53, 15, 0.4)", // yellow-900/40
+    borderColor: "rgba(251, 191, 36, 0.5)", // yellow-400/50
   },
   lowestChip: {
     backgroundColor: "#10b981",

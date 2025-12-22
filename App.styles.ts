@@ -103,12 +103,17 @@ const styles = StyleSheet.create({
     marginTop: 6,
   },
   statsContainer: {
-    backgroundColor: "rgba(0,0,0,0.4)",
-    borderRadius: 8,
-    padding: 10,
-    marginBottom: 24,
-    borderWidth: 1,
-    borderColor: "rgba(6,182,212,0.5)",
+    backgroundColor: "rgba(0, 0, 0, 0.4)", // bg-black/40
+    borderRadius: 12, // rounded-xl
+    padding: 24, // p-6
+    marginBottom: 32,
+    borderWidth: 2, // border-2
+    borderColor: "rgba(167, 139, 250, 0.5)", // border-purple-400/50
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.5,
+    shadowRadius: 25,
+    elevation: 10, // Para Android
   },
   statsHeader: {
     flexDirection: "row",
@@ -134,34 +139,37 @@ const styles = StyleSheet.create({
   },
   statsGrid: {
     flexDirection: "row",
+    gap: 16,
   },
   statCard: {
     flex: 1,
-    padding: 8,
-    alignItems: "flex-start",
+    padding: 16,
+    alignItems: "center",
+    borderRadius: 12,
+    borderWidth: 1,
   },
   lowestCard: {
     backgroundColor: "#10b981", // green-500
-    borderTopLeftRadius: 3,
-    borderBottomLeftRadius: 3,
+    borderColor: "#4ade80", // green-400
   },
   highestCard: {
     backgroundColor: "#ef4444", // red-500
+    borderColor: "#f87171", // red-400
   },
   averageCard: {
     backgroundColor: "#3b82f6", // blue-500
-    borderTopRightRadius: 3,
-    borderBottomRightRadius: 3,
+    borderColor: "#60a5fa", // blue-400
   },
   statLabel: {
     color: "white",
     fontSize: 10,
-
+    fontFamily: "monospace",
     marginBottom: 4,
   },
   statValue: {
     color: "white",
-    fontSize: 20,
+    fontSize: 24,
+    fontWeight: "bold",
   },
 
   row: {
@@ -429,17 +437,20 @@ const styles = StyleSheet.create({
   },
   // Collection button styles
   collectionButton: {
-    backgroundColor: "#f59e0b", // amber-500
-    paddingVertical: 18,
+    backgroundColor: "#a855f7", // purple-500
+    paddingVertical: 12,
     paddingHorizontal: 16,
-    borderRadius: 6,
+    borderRadius: 8,
     alignItems: "center",
     marginTop: 16,
+    borderWidth: 2,
+    borderColor: "rgba(168, 85, 247, 0.5)", // purple-400/50
   },
   collectionButtonText: {
     color: "white",
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: "bold",
+    fontFamily: "monospace",
   },
   // Loading styles
   loadingContainer: {
@@ -579,23 +590,26 @@ const styles = StyleSheet.create({
   },
   // Price Data Styles
   consoleText: {
-    color: "#67e8f9",
+    color: "white",
     fontSize: 14,
-    textAlign: "center",
-    marginTop: 8,
-    fontWeight: "600",
+    textAlign: "left",
+    marginTop: 4,
+    fontWeight: "bold",
+    fontFamily: "monospace",
   },
   genreText: {
-    color: "#9ca3af",
+    color: "white",
     fontSize: 12,
-    textAlign: "center",
-    marginTop: 4,
+    textAlign: "left",
+    marginTop: 8,
+    fontFamily: "monospace",
   },
   releaseDateText: {
-    color: "#9ca3af",
+    color: "white",
     fontSize: 12,
-    textAlign: "center",
-    marginTop: 2,
+    textAlign: "left",
+    marginTop: 4,
+    fontFamily: "monospace",
   },
   priceCardsContainer: {
     flexDirection: "row",
@@ -618,20 +632,20 @@ const styles = StyleSheet.create({
     borderColor: "rgba(96, 165, 250, 0.5)", // blue-400/50
   },
   cibCard: {
-    backgroundColor: "rgba(76, 29, 149, 0.4)", // violet-900/40
-    borderColor: "rgba(167, 139, 250, 0.5)", // violet-400/50
-  },
-  newCard: {
     backgroundColor: "rgba(6, 78, 59, 0.4)", // green-900/40
     borderColor: "rgba(52, 211, 153, 0.5)", // green-400/50
   },
+  newCard: {
+    backgroundColor: "rgba(76, 29, 149, 0.4)", // purple-900/40
+    borderColor: "rgba(167, 139, 250, 0.5)", // purple-400/50
+  },
   gradedCard: {
-    backgroundColor: "rgba(120, 53, 15, 0.4)", // amber-900/40
-    borderColor: "rgba(251, 191, 36, 0.5)", // amber-400/50
+    backgroundColor: "rgba(120, 53, 15, 0.4)", // yellow-900/40
+    borderColor: "rgba(251, 191, 36, 0.5)", // yellow-400/50
   },
   boxOnlyCard: {
-    backgroundColor: "rgba(157, 23, 77, 0.4)", // pink-900/40
-    borderColor: "rgba(244, 114, 182, 0.5)", // pink-400/50
+    backgroundColor: "rgba(23, 23, 23, 0.4)", // gray-900/40
+    borderColor: "rgba(163, 163, 163, 0.5)", // gray-400/50
   },
   priceCardLabel: {
     color: "rgba(147, 197, 253, 1)", // blue-300
