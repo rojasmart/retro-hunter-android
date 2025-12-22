@@ -2,9 +2,18 @@ import React, { useEffect, useState } from "react";
 import { View, Text, FlatList, TouchableOpacity, StyleSheet, Alert, ActivityIndicator, TextInput, Modal } from "react-native";
 import { useAuth } from "../context/AuthContext";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { AUTH_BASE_URL } from "../config";
+import { AUTH_BASE_URL, API_BASE_URL } from "../config";
+import PriceHistoryChart from "../components/PriceHistoryChart";
 
 import styles from "./MyCollectionsPage.styles";
+
+interface PriceHistoryData {
+  date: string;
+  loosePrice?: number;
+  cibPrice?: number;
+  newPrice?: number;
+  gradedPrice?: number;
+}
 
 interface Item {
   _id: string;
@@ -30,6 +39,7 @@ interface Item {
   createdAt?: string;
   isWishlist?: boolean;
   completionStatus?: string;
+  priceHistory?: PriceHistoryData[];
 }
 
 export default function MyCollectionsPage({ onBack }: { onBack?: () => void }) {
@@ -39,6 +49,7 @@ export default function MyCollectionsPage({ onBack }: { onBack?: () => void }) {
   const [isAdding, setIsAdding] = useState(false);
   const [newTitle, setNewTitle] = useState("");
   const [newPlatform, setNewPlatform] = useState("");
+  const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     fetchCollections();
@@ -141,6 +152,9 @@ export default function MyCollectionsPage({ onBack }: { onBack?: () => void }) {
         }));
 
         setItems(mappedItems);
+
+        // Fetch and update daily prices for items with priceChartingId
+        await fetchAndUpdateDailyPrices(mappedItems, token);
       } else {
         setItems(Array.isArray(list) ? list : []);
       }
@@ -151,6 +165,113 @@ export default function MyCollectionsPage({ onBack }: { onBack?: () => void }) {
     } finally {
       setLoading(false);
     }
+  };
+
+  // Fetch daily prices from PriceCharting and update the backend
+  const fetchAndUpdateDailyPrices = async (items: Item[], token: string | null) => {
+    try {
+      // Filter items that have priceChartingId
+      const itemsWithPriceId = items.filter((item) => item.priceChartingId);
+
+      for (const item of itemsWithPriceId) {
+        try {
+          // Fetch current prices from PriceCharting via your backend
+          const priceResponse = await fetch(`${API_BASE_URL}/price-charting/${item.priceChartingId}`);
+
+          if (priceResponse.ok) {
+            const priceData = await priceResponse.json();
+
+            // Create price history entry for today
+            const today = new Date().toISOString().split("T")[0];
+            const historyEntry = {
+              date: today,
+              loosePrice: priceData.prices?.loose,
+              cibPrice: priceData.prices?.cib,
+              newPrice: priceData.prices?.new,
+              gradedPrice: priceData.prices?.graded,
+            };
+
+            // Update the item in the backend with today's prices
+            const updateCandidates = [
+              `${AUTH_BASE_URL}/gameincollections/${item._id}/price-history`,
+              `${AUTH_BASE_URL}/collection/${item._id}/price-history`,
+            ];
+
+            for (const url of updateCandidates) {
+              try {
+                const updateRes = await fetch(url, {
+                  method: "POST",
+                  headers: {
+                    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+                    "Content-Type": "application/json",
+                  },
+                  body: JSON.stringify(historyEntry),
+                });
+
+                if (updateRes.ok) {
+                  console.log(`Updated price history for ${item.gameTitle}`);
+                  break;
+                }
+              } catch (e) {
+                console.error("Failed to update price history for", item.gameTitle, e);
+                continue;
+              }
+            }
+          }
+        } catch (e) {
+          console.error("Failed to fetch prices for", item.gameTitle, e);
+        }
+      }
+
+      // Refresh collections to get updated price history
+      const uid = (user as any)?.id ?? (user as any)?._id ?? (user as any)?.userId;
+      const candidates = [`${AUTH_BASE_URL}/gameincollections/${uid}`, `${AUTH_BASE_URL}/collection/${uid}`];
+
+      for (const url of candidates) {
+        try {
+          const res = await fetch(url, {
+            headers: token ? { Authorization: `Bearer ${token}`, "Content-Type": "application/json" } : { "Content-Type": "application/json" },
+          });
+
+          if (res.ok) {
+            const data = await res.json();
+            let list = data.collections || data.items || data.games || data || [];
+
+            if (Array.isArray(list)) {
+              const filtered = list.filter((it: any) => {
+                if (!it) return false;
+                return (it.userId ?? it.user ?? it.userid ?? it.user_id) === uid;
+              });
+
+              const mappedItems = filtered.map((item: any) => ({
+                ...item,
+                cibPrice: item.cibPrice ?? item.completePrice,
+                boxOnlyPrice: item.boxOnlyPrice ?? item.boxPrice,
+              }));
+
+              setItems(mappedItems);
+              break;
+            }
+          }
+        } catch (e) {
+          continue;
+        }
+      }
+    } catch (error) {
+      console.error("fetchAndUpdateDailyPrices error:", error);
+    }
+  };
+
+  const toggleItemExpansion = (itemId: string) => {
+    setExpandedItems((prev) => {
+      const newSet = new Set(prev);
+      if (newSet.has(itemId)) {
+        newSet.delete(itemId);
+      } else {
+        newSet.add(itemId);
+      }
+      return newSet;
+    });
   };
 
   const addItem = async () => {
@@ -249,6 +370,7 @@ export default function MyCollectionsPage({ onBack }: { onBack?: () => void }) {
   const renderItem = ({ item }: { item: Item }) => {
     // Check if we have new PriceCharting data
     const hasNewPrices = !!(item.loosePrice || item.cibPrice || item.newPrice || item.gradedPrice || item.boxOnlyPrice);
+    const isExpanded = expandedItems.has(item._id);
 
     // Debug: Log the item to see what prices we have
     console.log("Rendering item:", item.gameTitle, {
@@ -258,6 +380,7 @@ export default function MyCollectionsPage({ onBack }: { onBack?: () => void }) {
       gradedPrice: item.gradedPrice,
       boxOnlyPrice: item.boxOnlyPrice,
       hasNewPrices,
+      priceHistory: item.priceHistory,
     });
 
     return (
@@ -325,6 +448,19 @@ export default function MyCollectionsPage({ onBack }: { onBack?: () => void }) {
 
         {/* Notes if available */}
         {item.notes ? <Text style={styles.notes}>Notes: {item.notes}</Text> : null}
+
+        {/* Price History Chart - Show if has price history */}
+        {hasNewPrices && (
+          <>
+            <TouchableOpacity style={styles.historyToggle} onPress={() => toggleItemExpansion(item._id)}>
+              <Text style={styles.historyToggleText}>
+                {isExpanded ? "▼" : "▶"} {isExpanded ? "Hide" : "Show"} Price History
+              </Text>
+            </TouchableOpacity>
+
+            {isExpanded && <PriceHistoryChart data={item.priceHistory || []} gameTitle={item.gameTitle} />}
+          </>
+        )}
 
         {/* Delete button */}
         <TouchableOpacity

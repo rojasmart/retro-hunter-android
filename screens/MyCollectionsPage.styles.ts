@@ -125,6 +125,20 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: "bold",
   },
+  historyToggle: {
+    backgroundColor: "rgba(6,182,212,0.2)",
+    borderWidth: 1,
+    borderColor: "rgba(6,182,212,0.4)",
+    padding: 10,
+    borderRadius: 6,
+    alignItems: "center",
+    marginTop: 12,
+  },
+  historyToggleText: {
+    color: "#67e8f9",
+    fontSize: 13,
+    fontWeight: "bold",
+  },
 });
 
 export default styles;
