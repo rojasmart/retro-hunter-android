@@ -108,6 +108,18 @@ const styles = StyleSheet.create({
     color: "white",
     fontWeight: "bold",
   },
+  statLabelRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    width: "100%",
+    marginBottom: 2,
+  },
+  trendBadge: {
+    marginLeft: 6,
+    justifyContent: "center",
+    alignItems: "center",
+  },
   statValue: {
     fontSize: 18,
     color: "white",

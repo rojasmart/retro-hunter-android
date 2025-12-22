@@ -4,6 +4,7 @@ import { useAuth } from "../context/AuthContext";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { AUTH_BASE_URL, API_BASE_URL } from "../config";
 import PriceHistoryChart from "../components/PriceHistoryChart";
+import { ArrowUpCircleIcon, ArrowDownCircleIcon, ArrowRightCircleIcon } from "react-native-heroicons/solid";
 
 import styles from "./MyCollectionsPage.styles";
 
@@ -274,6 +275,73 @@ export default function MyCollectionsPage({ onBack }: { onBack?: () => void }) {
     });
   };
 
+  // Calculate price trend based on history
+  const getPriceTrend = (currentPrice: number | undefined, priceHistory: PriceHistoryData[] | undefined, priceType: keyof PriceHistoryData) => {
+    if (!currentPrice || !priceHistory || priceHistory.length < 1) {
+      return {
+        trend: "neutral",
+        icon: <ArrowRightCircleIcon size={18} color="#9ca3af" />,
+        color: "#9ca3af",
+      }; // neutral gray
+    }
+
+    // Sort history by date (oldest first, then most recent)
+    const sortedHistory = [...priceHistory].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+
+    // Filter to only entries that have this price type
+    const validHistory = sortedHistory.filter((entry) => {
+      const price = entry[priceType];
+      return typeof price === "number" && price > 0;
+    });
+
+    // Need at least 2 valid entries to calculate trend
+    if (validHistory.length < 2) {
+      return {
+        trend: "neutral",
+        icon: <ArrowRightCircleIcon size={18} color="#9ca3af" />,
+        color: "#9ca3af",
+      };
+    }
+
+    // Compare OLDEST entry with MOST RECENT entry (full period trend)
+    const oldestPrice = validHistory[0][priceType] as number;
+    const oldestDate = validHistory[0].date;
+    const mostRecentPrice = validHistory[validHistory.length - 1][priceType] as number;
+    const mostRecentDate = validHistory[validHistory.length - 1].date;
+
+    console.log(
+      `[TREND] ${priceType}: oldest=${oldestPrice} (${oldestDate}), mostRecent=${mostRecentPrice} (${mostRecentDate}), current=${currentPrice}`
+    );
+
+    const difference = mostRecentPrice - oldestPrice;
+    const percentageChange = (difference / oldestPrice) * 100;
+
+    console.log(`[TREND] ${priceType}: diff=${difference.toFixed(2)}, %=${percentageChange.toFixed(2)}%`);
+
+    // Consider changes less than 0.2% as neutral (reduced from 0.5% for more sensitivity)
+    if (Math.abs(percentageChange) < 0.2) {
+      return {
+        trend: "neutral",
+        icon: <ArrowRightCircleIcon size={18} color="#9ca3af" />,
+        color: "#9ca3af",
+      };
+    }
+
+    if (difference > 0) {
+      return {
+        trend: "up",
+        icon: <ArrowUpCircleIcon size={18} color="#10b981" />,
+        color: "#10b981",
+      }; // green
+    } else {
+      return {
+        trend: "down",
+        icon: <ArrowDownCircleIcon size={18} color="#ef4444" />,
+        color: "#ef4444",
+      }; // red
+    }
+  };
+
   const addItem = async () => {
     if (!newTitle || !newPlatform) {
       Alert.alert("Validation", "Title and platform are required");
@@ -372,6 +440,12 @@ export default function MyCollectionsPage({ onBack }: { onBack?: () => void }) {
     const hasNewPrices = !!(item.loosePrice || item.cibPrice || item.newPrice || item.gradedPrice || item.boxOnlyPrice);
     const isExpanded = expandedItems.has(item._id);
 
+    // Calculate trends for each price type
+    const looseTrend = getPriceTrend(item.loosePrice, item.priceHistory, "loosePrice");
+    const cibTrend = getPriceTrend(item.cibPrice, item.priceHistory, "cibPrice");
+    const newTrend = getPriceTrend(item.newPrice, item.priceHistory, "newPrice");
+    const gradedTrend = getPriceTrend(item.gradedPrice, item.priceHistory, "gradedPrice");
+
     // Debug: Log the item to see what prices we have
     console.log("Rendering item:", item.gameTitle, {
       loosePrice: item.loosePrice,
@@ -406,25 +480,37 @@ export default function MyCollectionsPage({ onBack }: { onBack?: () => void }) {
           <View style={styles.priceGrid}>
             {item.loosePrice && (
               <View style={[styles.statChip, styles.looseChip]}>
-                <Text style={styles.statLabel}>Loose</Text>
+                <View style={styles.statLabelRow}>
+                  <Text style={styles.statLabel}>Loose</Text>
+                  <View style={styles.trendBadge}>{looseTrend.icon}</View>
+                </View>
                 <Text style={styles.statValue}>${item.loosePrice.toFixed(2)}</Text>
               </View>
             )}
             {item.cibPrice && (
               <View style={[styles.statChip, styles.cibChip]}>
-                <Text style={styles.statLabel}>CIB</Text>
+                <View style={styles.statLabelRow}>
+                  <Text style={styles.statLabel}>CIB</Text>
+                  <View style={styles.trendBadge}>{cibTrend.icon}</View>
+                </View>
                 <Text style={styles.statValue}>${item.cibPrice.toFixed(2)}</Text>
               </View>
             )}
             {item.newPrice && (
               <View style={[styles.statChip, styles.newChip]}>
-                <Text style={styles.statLabel}>New</Text>
+                <View style={styles.statLabelRow}>
+                  <Text style={styles.statLabel}>New</Text>
+                  <View style={styles.trendBadge}>{newTrend.icon}</View>
+                </View>
                 <Text style={styles.statValue}>${item.newPrice.toFixed(2)}</Text>
               </View>
             )}
             {item.gradedPrice && (
               <View style={[styles.statChip, styles.gradedChip]}>
-                <Text style={styles.statLabel}>Graded</Text>
+                <View style={styles.statLabelRow}>
+                  <Text style={styles.statLabel}>Graded</Text>
+                  <View style={styles.trendBadge}>{gradedTrend.icon}</View>
+                </View>
                 <Text style={styles.statValue}>${item.gradedPrice.toFixed(2)}</Text>
               </View>
             )}
