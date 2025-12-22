@@ -488,7 +488,6 @@ function AppContent() {
                       <View style={styles.statsContainer}>
                         <TouchableOpacity style={styles.statsHeader} onPress={() => setShowStatsExtras(!showStatsExtras)} activeOpacity={0.7}>
                           <Text style={styles.resultsTitle}>{priceData.product_name}</Text>
-                          <Text style={styles.statsToggleIcon}>{showStatsExtras ? "▼" : "▶"}</Text>
                         </TouchableOpacity>
 
                         <Text style={styles.consoleText}>{priceData.console_name}</Text>

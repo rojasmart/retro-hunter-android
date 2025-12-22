@@ -118,11 +118,12 @@ const styles = StyleSheet.create({
     position: "relative",
   },
   resultsTitle: {
-    fontSize: 24,
+    fontSize: 24, // text-2xl
     fontWeight: "bold",
-    color: "#67e8f9",
+    color: "#f472b6", // pink-400
     textAlign: "center",
     flex: 1,
+    fontFamily: "monospace", // font-mono
   },
   statsToggleIcon: {
     color: "#67e8f9",
@@ -605,37 +606,43 @@ const styles = StyleSheet.create({
   },
   priceCard: {
     width: "48%",
-    padding: 16,
+    padding: 12,
     borderRadius: 8,
-    alignItems: "center",
+    borderWidth: 2,
+    alignItems: "flex-start",
     justifyContent: "center",
     marginBottom: 12,
   },
   looseCard: {
-    backgroundColor: "#0ea5e9", // blue-500
+    backgroundColor: "rgba(30, 58, 138, 0.4)", // blue-900/40
+    borderColor: "rgba(96, 165, 250, 0.5)", // blue-400/50
   },
   cibCard: {
-    backgroundColor: "#8b5cf6", // violet-500
+    backgroundColor: "rgba(76, 29, 149, 0.4)", // violet-900/40
+    borderColor: "rgba(167, 139, 250, 0.5)", // violet-400/50
   },
   newCard: {
-    backgroundColor: "#10b981", // green-500
+    backgroundColor: "rgba(6, 78, 59, 0.4)", // green-900/40
+    borderColor: "rgba(52, 211, 153, 0.5)", // green-400/50
   },
   gradedCard: {
-    backgroundColor: "#f59e0b", // amber-500
+    backgroundColor: "rgba(120, 53, 15, 0.4)", // amber-900/40
+    borderColor: "rgba(251, 191, 36, 0.5)", // amber-400/50
   },
   boxOnlyCard: {
-    backgroundColor: "#ec4899", // pink-500
+    backgroundColor: "rgba(157, 23, 77, 0.4)", // pink-900/40
+    borderColor: "rgba(244, 114, 182, 0.5)", // pink-400/50
   },
   priceCardLabel: {
-    color: "white",
-    fontSize: 12,
-    fontWeight: "bold",
-    marginBottom: 8,
-    letterSpacing: 1,
+    color: "rgba(147, 197, 253, 1)", // blue-300
+    fontSize: 10,
+    fontWeight: "600",
+    marginBottom: 4,
+    letterSpacing: 0.5,
   },
   priceCardValue: {
     color: "white",
-    fontSize: 24,
+    fontSize: 18,
     fontWeight: "bold",
   },
 });
