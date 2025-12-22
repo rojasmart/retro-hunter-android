@@ -171,6 +171,45 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "bold",
   },
+  // New menu sections styles
+  sectionContainer: {
+    width: "100%",
+    marginTop: 24,
+    marginBottom: 8,
+  },
+  sectionTitle: {
+    color: "#67e8f9",
+    fontSize: 18,
+    fontWeight: "bold",
+    marginBottom: 12,
+    fontFamily: "monospace",
+  },
+  menuItem: {
+    backgroundColor: "rgba(0,0,0,0.3)",
+    padding: 16,
+    borderRadius: 8,
+    marginBottom: 8,
+    borderWidth: 1,
+    borderColor: "rgba(6,182,212,0.2)",
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  menuItemText: {
+    color: "white",
+    fontSize: 16,
+    flex: 1,
+  },
+  menuItemArrow: {
+    color: "#67e8f9",
+    fontSize: 24,
+    fontWeight: "bold",
+  },
+  menuItemValue: {
+    color: "#9ca3af",
+    fontSize: 14,
+    fontFamily: "monospace",
+  },
 });
 
 export default styles;

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, Text, TextInput, TouchableOpacity, ActivityIndicator, Alert } from "react-native";
+import { View, Text, TextInput, TouchableOpacity, ActivityIndicator, Alert, Linking, ScrollView } from "react-native";
 import { useAuth } from "../context/AuthContext";
 
 import { LinearGradient } from "expo-linear-gradient";
@@ -62,7 +62,7 @@ export default function MyAccount({ onDone, onBack }: { onDone?: () => void; onB
   // If user is logged in, show profile view
   if (user) {
     return (
-      <View style={styles.container}>
+      <ScrollView contentContainerStyle={{ padding: 20 }}>
         <View style={styles.profileCard}>
           <View style={styles.avatarContainer}>
             <Text style={styles.avatarText}>{(user.name || user.email || "U").charAt(0).toUpperCase()}</Text>
@@ -80,11 +80,64 @@ export default function MyAccount({ onDone, onBack }: { onDone?: () => void; onB
             <Text style={styles.infoValue}>{user.email}</Text>
           </View>
 
+          {/* Support & Feedback Section */}
+          <View style={styles.sectionContainer}>
+            <Text style={styles.sectionTitle}>Support & Feedback</Text>
+
+            <TouchableOpacity style={styles.menuItem} onPress={() => Linking.openURL("mailto:support@retrohunter.com?subject=Feedback")}>
+              <Text style={styles.menuItemText}>💬 Leave Feedback</Text>
+              <Text style={styles.menuItemArrow}>›</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity style={styles.menuItem} onPress={() => Linking.openURL("mailto:support@retrohunter.com?subject=Feature Request")}>
+              <Text style={styles.menuItemText}>✨ Request a Feature</Text>
+              <Text style={styles.menuItemArrow}>›</Text>
+            </TouchableOpacity>
+          </View>
+
+          {/* About Section */}
+          <View style={styles.sectionContainer}>
+            <Text style={styles.sectionTitle}>About</Text>
+
+            <TouchableOpacity style={styles.menuItem} onPress={() => Alert.alert("Version", "Retro Hunter v1.0.0")}>
+              <Text style={styles.menuItemText}>ℹ️ App Version</Text>
+              <Text style={styles.menuItemValue}>1.0.0</Text>
+            </TouchableOpacity>
+          </View>
+
+          {/* Legal Section */}
+          <View style={styles.sectionContainer}>
+            <Text style={styles.sectionTitle}>Legal</Text>
+
+            <TouchableOpacity style={styles.menuItem} onPress={() => Alert.alert("Terms & Conditions", "Terms and Conditions content here...")}>
+              <Text style={styles.menuItemText}>📄 Terms & Conditions</Text>
+              <Text style={styles.menuItemArrow}>›</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity style={styles.menuItem} onPress={() => Alert.alert("Privacy Policy", "Privacy Policy content here...")}>
+              <Text style={styles.menuItemText}>🔒 Privacy Policy</Text>
+              <Text style={styles.menuItemArrow}>›</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.menuItem}
+              onPress={() =>
+                Alert.alert(
+                  "Open Source Licenses",
+                  "React Native - MIT License\nReact - MIT License\nExpo - MIT License\n\nFull license details available at:\nhttps://github.com/facebook/react-native/blob/main/LICENSE"
+                )
+              }
+            >
+              <Text style={styles.menuItemText}>⚖️ Open Source Licenses</Text>
+              <Text style={styles.menuItemArrow}>›</Text>
+            </TouchableOpacity>
+          </View>
+
           <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
             <Text style={styles.logoutButtonText}>LOGOUT</Text>
           </TouchableOpacity>
         </View>
-      </View>
+      </ScrollView>
     );
   }
 
@@ -101,7 +154,7 @@ export default function MyAccount({ onDone, onBack }: { onDone?: () => void; onB
           <Text style={styles.logoText}>RETRO HUNTER</Text>
         </LinearGradient>
 
-        <Text style={styles.formTitle}>{isRegister ? "Create Account" : "Welcome Back"}</Text>
+        <Text style={styles.formTitle}>{isRegister ? "Create Account" : "Login Account"}</Text>
         <Text style={styles.formSubtitle}>{isRegister ? "Join the hunt for retro games" : "Login to your account"}</Text>
 
         {error && (
