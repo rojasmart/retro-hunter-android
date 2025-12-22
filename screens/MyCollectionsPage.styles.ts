@@ -70,25 +70,27 @@ const styles = StyleSheet.create({
   statChip: {
     width: "48%", // Garante exatamente 2 colunas (48% x 2 + gap)
     alignItems: "flex-start",
-    paddingVertical: 8,
-    paddingHorizontal: 8,
+    paddingVertical: 10,
+    paddingHorizontal: 10,
     marginBottom: 8,
+    borderRadius: 8,
+    borderWidth: 2,
   },
   looseChip: {
-    backgroundColor: "#0ea5e9", // blue-500
-    borderRadius: 3,
+    backgroundColor: "rgba(30, 58, 138, 0.4)", // blue-900/40
+    borderColor: "rgba(96, 165, 250, 0.5)", // blue-400/50
   },
   cibChip: {
-    backgroundColor: "#8b5cf6", // violet-500
-    borderRadius: 3,
+    backgroundColor: "rgba(76, 29, 149, 0.4)", // violet-900/40
+    borderColor: "rgba(167, 139, 250, 0.5)", // violet-400/50
   },
   newChip: {
-    backgroundColor: "#10b981", // green-500
-    borderRadius: 3,
+    backgroundColor: "rgba(6, 78, 59, 0.4)", // green-900/40
+    borderColor: "rgba(52, 211, 153, 0.5)", // green-400/50
   },
   gradedChip: {
-    backgroundColor: "#f59e0b", // amber-500
-    borderRadius: 3,
+    backgroundColor: "rgba(120, 53, 15, 0.4)", // amber-900/40
+    borderColor: "rgba(251, 191, 36, 0.5)", // amber-400/50
   },
   lowestChip: {
     backgroundColor: "#10b981",
@@ -104,16 +106,18 @@ const styles = StyleSheet.create({
     borderBottomRightRadius: 3,
   },
   statLabel: {
-    fontSize: 11,
-    color: "white",
-    fontWeight: "bold",
+    fontSize: 10,
+    color: "rgba(147, 197, 253, 1)", // blue-300 para labels
+    fontWeight: "600",
+    letterSpacing: 0.5,
+    marginBottom: 2,
   },
   statLabelRow: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
     width: "100%",
-    marginBottom: 2,
+    marginBottom: 4,
   },
   trendBadge: {
     marginLeft: 6,
@@ -122,6 +126,7 @@ const styles = StyleSheet.create({
   },
   statValue: {
     fontSize: 18,
+    fontWeight: "bold",
     color: "white",
     marginTop: 2,
   },
