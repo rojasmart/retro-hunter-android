@@ -318,8 +318,8 @@ export default function MyCollectionsPage({ onBack }: { onBack?: () => void }) {
 
     console.log(`[TREND] ${priceType}: diff=${difference.toFixed(2)}, %=${percentageChange.toFixed(2)}%`);
 
-    // Consider changes less than 0.2% as neutral (reduced from 0.5% for more sensitivity)
-    if (Math.abs(percentageChange) < 0.2) {
+    // Any price change is significant (no threshold)
+    if (difference === 0) {
       return {
         trend: "neutral",
         icon: <ArrowRightCircleIcon size={18} color="#9ca3af" />,
