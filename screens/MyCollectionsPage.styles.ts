@@ -19,23 +19,26 @@ const styles = StyleSheet.create({
     paddingRight: 12,
   },
   cardRight: {
-    alignItems: "flex-end",
-    backgroundColor: "rgba(16,185,129,0.15)",
-    borderRadius: 3,
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "rgba(31, 41, 55, 0.5)", // gray-800/50
+    borderRadius: 6,
     paddingVertical: 8,
     paddingHorizontal: 12,
+    borderWidth: 1,
+    borderColor: "rgba(6, 182, 212, 0.3)", // cyan-400/30
   },
   title: { color: "#e6f7ff", fontSize: 19 },
   meta: { color: "#9ca3af", fontSize: 12, marginTop: 4 },
   paidLabel: {
-    color: "#6ee7b7",
-    fontSize: 10,
-    letterSpacing: 1,
+    color: "#d8b4fe", // purple-300
+    fontSize: 14,
+    marginRight: 8,
   },
   paidPrice: {
-    color: "#10b981",
-    fontSize: 20,
-    marginTop: 2,
+    color: "#c084fc", // purple-400
+    fontSize: 18,
+    fontWeight: "bold",
   },
   price: { color: "#10b981", fontWeight: "bold", marginTop: 6 },
   emptyCentered: { padding: 24, alignItems: "center" },

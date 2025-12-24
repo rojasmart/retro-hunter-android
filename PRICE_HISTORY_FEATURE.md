@@ -149,8 +149,8 @@ interface Item {
 
 Cada item da coleção que possui preços do PriceCharting mostra um botão:
 
-- **"▶ Show Price History"** quando colapsado
-- **"▼ Hide Price History"** quando expandido
+- **"Show Price History"** quando colapsado
+- **"Hide Price History"** quando expandido
 
 ### 2. **Gráfico**
 

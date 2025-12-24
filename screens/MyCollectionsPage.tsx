@@ -51,6 +51,7 @@ export default function MyCollectionsPage({ onBack }: { onBack?: () => void }) {
   const [newTitle, setNewTitle] = useState("");
   const [newPlatform, setNewPlatform] = useState("");
   const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set());
+  const [updatingPrices, setUpdatingPrices] = useState(false);
 
   useEffect(() => {
     fetchCollections();
@@ -171,8 +172,14 @@ export default function MyCollectionsPage({ onBack }: { onBack?: () => void }) {
   // Fetch daily prices from PriceCharting and update the backend
   const fetchAndUpdateDailyPrices = async (items: Item[], token: string | null) => {
     try {
+      setUpdatingPrices(true);
       // Filter items that have priceChartingId
       const itemsWithPriceId = items.filter((item) => item.priceChartingId);
+
+      console.log(`[PRICE UPDATE] Starting update for ${itemsWithPriceId.length} items...`);
+
+      let successCount = 0;
+      let failCount = 0;
 
       for (const item of itemsWithPriceId) {
         try {
@@ -192,12 +199,15 @@ export default function MyCollectionsPage({ onBack }: { onBack?: () => void }) {
               gradedPrice: priceData.prices?.graded,
             };
 
+            console.log(`[PRICE UPDATE] ${item.gameTitle} - Today: ${today}`, historyEntry);
+
             // Update the item in the backend with today's prices
             const updateCandidates = [
               `${AUTH_BASE_URL}/gameincollections/${item._id}/price-history`,
               `${AUTH_BASE_URL}/collection/${item._id}/price-history`,
             ];
 
+            let updated = false;
             for (const url of updateCandidates) {
               try {
                 const updateRes = await fetch(url, {
@@ -209,19 +219,43 @@ export default function MyCollectionsPage({ onBack }: { onBack?: () => void }) {
                   body: JSON.stringify(historyEntry),
                 });
 
+                const responseText = await updateRes.text();
+                console.log(`[PRICE UPDATE] POST ${url} - Status: ${updateRes.status}, Response: ${responseText}`);
+
                 if (updateRes.ok) {
-                  console.log(`Updated price history for ${item.gameTitle}`);
+                  console.log(`✅ Updated price history for ${item.gameTitle}`);
+                  successCount++;
+                  updated = true;
                   break;
+                } else {
+                  console.warn(`⚠️ Failed to update ${item.gameTitle} at ${url}: ${updateRes.status} - ${responseText}`);
                 }
               } catch (e) {
-                console.error("Failed to update price history for", item.gameTitle, e);
+                console.error(`❌ Error updating ${item.gameTitle} at ${url}:`, e);
                 continue;
               }
             }
+
+            if (!updated) {
+              failCount++;
+              console.error(`❌ All endpoints failed for ${item.gameTitle}`);
+            }
+          } else {
+            failCount++;
+            console.error(`❌ Failed to fetch prices for ${item.gameTitle}: ${priceResponse.status}`);
           }
         } catch (e) {
-          console.error("Failed to fetch prices for", item.gameTitle, e);
+          failCount++;
+          console.error(`❌ Exception fetching prices for ${item.gameTitle}:`, e);
         }
+      }
+
+      console.log(`[PRICE UPDATE] Complete: ${successCount} success, ${failCount} failed`);
+
+      if (successCount > 0) {
+        Alert.alert("Price Update", `Updated ${successCount} game(s) successfully!${failCount > 0 ? `\n${failCount} failed.` : ""}`);
+      } else if (failCount > 0) {
+        Alert.alert("Price Update Failed", `Failed to update ${failCount} game(s). Check console for details.`);
       }
 
       // Refresh collections to get updated price history
@@ -260,6 +294,21 @@ export default function MyCollectionsPage({ onBack }: { onBack?: () => void }) {
       }
     } catch (error) {
       console.error("fetchAndUpdateDailyPrices error:", error);
+      Alert.alert("Error", "Failed to update prices. Check console for details.");
+    } finally {
+      setUpdatingPrices(false);
+    }
+  };
+
+  // Manual price update function
+  const manualPriceUpdate = async () => {
+    try {
+      const token = await AsyncStorage.getItem("auth_token");
+      await fetchAndUpdateDailyPrices(items, token);
+      // Refresh collections after update
+      await fetchCollections();
+    } catch (error) {
+      console.error("manualPriceUpdate error:", error);
     }
   };
 
@@ -539,9 +588,7 @@ export default function MyCollectionsPage({ onBack }: { onBack?: () => void }) {
         {hasNewPrices && (
           <>
             <TouchableOpacity style={styles.historyToggle} onPress={() => toggleItemExpansion(item._id)}>
-              <Text style={styles.historyToggleText}>
-                {isExpanded ? "▼" : "▶"} {isExpanded ? "Hide" : "Show"} Price History
-              </Text>
+              <Text style={styles.historyToggleText}>{isExpanded ? "Hide" : "Show"} Price History</Text>
             </TouchableOpacity>
 
             {isExpanded && <PriceHistoryChart data={item.priceHistory || []} gameTitle={item.gameTitle} />}
@@ -570,7 +617,9 @@ export default function MyCollectionsPage({ onBack }: { onBack?: () => void }) {
           <Text style={styles.back}>&lt; Back</Text>
         </TouchableOpacity>
         <Text style={styles.heading}>My Collections</Text>
-        <View style={{ width: 64 }} />
+        <TouchableOpacity onPress={manualPriceUpdate} disabled={updatingPrices} style={{ opacity: updatingPrices ? 0.5 : 1 }}>
+          <Text style={styles.back}>{updatingPrices ? "⏳" : "🔄"}</Text>
+        </TouchableOpacity>
       </View>
 
       {loading ? (
