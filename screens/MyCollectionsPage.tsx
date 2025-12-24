@@ -539,7 +539,7 @@ export default function MyCollectionsPage({ onBack }: { onBack?: () => void }) {
             {item.cibPrice && (
               <View style={[styles.statChip, styles.cibChip]}>
                 <View style={styles.statLabelRow}>
-                  <Text style={styles.statLabel}>CIB</Text>
+                  <Text style={styles.statLabel}>Complete</Text>
                   <View style={styles.trendBadge}>{cibTrend.icon}</View>
                 </View>
                 <Text style={styles.statValue}>${item.cibPrice.toFixed(2)}</Text>
