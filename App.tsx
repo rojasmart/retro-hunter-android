@@ -335,6 +335,14 @@ function AppContent() {
 
   // Add to collection network call
   const addToCollection = async () => {
+    // Check if user is logged in
+    if (!user) {
+      Alert.alert("Login Required", "Please login to add games to your collection");
+      setIsAddModalVisible(false);
+      setPage("account"); // Navigate to account page
+      return;
+    }
+
     // basic validation
     if (!searchNameState && !nome) {
       Alert.alert("Validation", "No game title to add");
@@ -528,18 +536,25 @@ function AppContent() {
                           )}
                         </View>
 
-                        {/* Add to Collection Button */}
-                        <TouchableOpacity
-                          style={styles.collectionButton}
-                          onPress={() => {
-                            // Open modal to collect purchase price and optional condition
-                            setPurchasePriceInput("");
-                            setAddConditionInput("used");
-                            setIsAddModalVisible(true);
-                          }}
-                        >
-                          <Text style={styles.collectionButtonText}>ADD TO COLLECTION</Text>
-                        </TouchableOpacity>
+                        {/* Add to Collection Button - Only for logged in users */}
+                        {user && (
+                          <TouchableOpacity
+                            style={styles.collectionButton}
+                            onPress={() => {
+                              // Open modal to collect purchase price and optional condition
+                              setPurchasePriceInput("");
+                              setAddConditionInput("used");
+                              setIsAddModalVisible(true);
+                            }}
+                          >
+                            <Text style={styles.collectionButtonText}>ADD TO COLLECTION</Text>
+                          </TouchableOpacity>
+                        )}
+                        {!user && (
+                          <View style={styles.loginPrompt}>
+                            <Text style={styles.loginPromptText}>Login to add games to your collection</Text>
+                          </View>
+                        )}
                       </View>
                     </View>
                   )}
@@ -682,18 +697,25 @@ function AppContent() {
                               {isLoadingRate && <Text style={styles.loadingText}>Updating...</Text>}
                             </View>
 
-                            {/* Add to Collection Button */}
-                            <TouchableOpacity
-                              style={styles.collectionButton}
-                              onPress={() => {
-                                // Open modal to collect purchase price and optional condition
-                                setPurchasePriceInput("");
-                                setAddConditionInput("used");
-                                setIsAddModalVisible(true);
-                              }}
-                            >
-                              <Text style={styles.collectionButtonText}>ADD TO COLLECTION</Text>
-                            </TouchableOpacity>
+                            {/* Add to Collection Button - Only for logged in users */}
+                            {user && (
+                              <TouchableOpacity
+                                style={styles.collectionButton}
+                                onPress={() => {
+                                  // Open modal to collect purchase price and optional condition
+                                  setPurchasePriceInput("");
+                                  setAddConditionInput("used");
+                                  setIsAddModalVisible(true);
+                                }}
+                              >
+                                <Text style={styles.collectionButtonText}>ADD TO COLLECTION</Text>
+                              </TouchableOpacity>
+                            )}
+                            {!user && (
+                              <View style={styles.loginPrompt}>
+                                <Text style={styles.loginPromptText}>Login to add games to your collection</Text>
+                              </View>
+                            )}
                           </>
                         )}
                       </View>

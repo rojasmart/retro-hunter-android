@@ -452,6 +452,24 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     fontFamily: "monospace",
   },
+  // Login prompt styles
+  loginPrompt: {
+    backgroundColor: "rgba(168, 85, 247, 0.2)", // purple with opacity
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    alignItems: "center",
+    marginTop: 16,
+    borderWidth: 2,
+    borderColor: "rgba(168, 85, 247, 0.5)",
+  },
+  loginPromptText: {
+    color: "#c084fc", // purple-400
+    fontSize: 14,
+    fontWeight: "600",
+    textAlign: "center",
+    fontFamily: "monospace",
+  },
   // Loading styles
   loadingContainer: {
     alignItems: "center",
