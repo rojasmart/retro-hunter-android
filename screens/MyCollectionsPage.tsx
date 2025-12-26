@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, FlatList, TouchableOpacity, StyleSheet, Alert, ActivityIndicator, TextInput, Modal } from "react-native";
+import { View, Text, FlatList, TouchableOpacity, StyleSheet, Alert, ActivityIndicator, TextInput, Modal, ScrollView } from "react-native";
 import { useAuth } from "../context/AuthContext";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { AUTH_BASE_URL, API_BASE_URL } from "../config";
@@ -16,12 +16,22 @@ interface PriceHistoryData {
   gradedPrice?: number;
 }
 
+interface Folder {
+  _id: string;
+  name: string;
+  description?: string;
+  color?: string;
+  userId: string;
+  createdAt?: string;
+}
+
 interface Item {
   _id: string;
   gameTitle: string;
   platform: string;
   condition?: string;
   purchasePrice?: number;
+  folderId?: string; // ID da pasta onde o jogo está
   // Old price fields (for backward compatibility)
   lowestPrice?: number;
   highestPrice?: number;
@@ -46,15 +56,31 @@ interface Item {
 export default function MyCollectionsPage({ onBack }: { onBack?: () => void }) {
   const { user } = useAuth();
   const [items, setItems] = useState<Item[]>([]);
+  const [folders, setFolders] = useState<Folder[]>([]);
+  const [selectedFolder, setSelectedFolder] = useState<string | null>(null); // null = "All Games"
   const [loading, setLoading] = useState(false);
   const [isAdding, setIsAdding] = useState(false);
   const [newTitle, setNewTitle] = useState("");
   const [newPlatform, setNewPlatform] = useState("");
+  const [newGameFolderId, setNewGameFolderId] = useState<string | null>(null); // Folder for new game
   const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set());
   const [updatingPrices, setUpdatingPrices] = useState(false);
 
+  // Folder management states
+  const [isFolderModalVisible, setIsFolderModalVisible] = useState(false);
+  const [isEditingFolder, setIsEditingFolder] = useState(false);
+  const [currentFolderId, setCurrentFolderId] = useState<string | null>(null);
+  const [folderName, setFolderName] = useState("");
+  const [folderDescription, setFolderDescription] = useState("");
+  const [folderColor, setFolderColor] = useState("#a855f7");
+
+  // Move game to folder modal
+  const [isMoveToFolderVisible, setIsMoveToFolderVisible] = useState(false);
+  const [gameToMove, setGameToMove] = useState<Item | null>(null);
+
   useEffect(() => {
     fetchCollections();
+    fetchFolders();
   }, [user]);
 
   const fetchCollections = async () => {
@@ -169,7 +195,194 @@ export default function MyCollectionsPage({ onBack }: { onBack?: () => void }) {
     }
   };
 
-  // Fetch daily prices from PriceCharting and update the backend
+  // Fetch folders from backend
+  const fetchFolders = async () => {
+    try {
+      const uid = (user as any)?.id ?? (user as any)?._id ?? (user as any)?.userId;
+      if (!uid) {
+        setFolders([]);
+        return;
+      }
+
+      const token = await AsyncStorage.getItem("auth_token");
+      const candidates = [`${AUTH_BASE_URL}/folders/${uid}`, `${AUTH_BASE_URL}/folders?userId=${uid}`, `${AUTH_BASE_URL}/collection-folders/${uid}`];
+
+      for (const url of candidates) {
+        try {
+          const res = await fetch(url, {
+            headers: token ? { Authorization: `Bearer ${token}`, "Content-Type": "application/json" } : { "Content-Type": "application/json" },
+          });
+
+          if (res.ok) {
+            const data = await res.json();
+            let list = data.folders || data.items || data || [];
+            if (Array.isArray(list)) {
+              setFolders(list);
+              break;
+            }
+          }
+        } catch (e) {
+          console.error("fetchFolders error for", url, e);
+          continue;
+        }
+      }
+    } catch (error) {
+      console.error("fetchFolders", error);
+    }
+  };
+
+  // Create or update folder
+  const saveFolder = async () => {
+    if (!folderName.trim()) {
+      Alert.alert("Validation", "Folder name is required");
+      return;
+    }
+
+    try {
+      setLoading(true);
+      const uid = (user as any)?.id ?? (user as any)?._id ?? (user as any)?.userId;
+      const token = await AsyncStorage.getItem("auth_token");
+      if (!token) throw new Error("Not authenticated");
+
+      const body = {
+        name: folderName,
+        description: folderDescription,
+        color: folderColor,
+        userId: uid,
+      };
+
+      const url = isEditingFolder && currentFolderId ? `${AUTH_BASE_URL}/folders?id=${currentFolderId}` : `${AUTH_BASE_URL}/folders`;
+
+      const method = isEditingFolder ? "PUT" : "POST";
+
+      const res = await fetch(url, {
+        method,
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(body),
+      });
+
+      if (res.ok) {
+        Alert.alert("Success", isEditingFolder ? "Folder updated" : "Folder created");
+        setFolderName("");
+        setFolderDescription("");
+        setFolderColor("#a855f7");
+        setIsFolderModalVisible(false);
+        setIsEditingFolder(false);
+        setCurrentFolderId(null);
+        fetchFolders();
+      } else {
+        Alert.alert("Error", "Failed to save folder");
+      }
+    } catch (e) {
+      console.error("saveFolder", e);
+      Alert.alert("Error", "Failed to save folder");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Delete folder
+  const deleteFolder = async (folderId: string) => {
+    try {
+      setLoading(true);
+      const token = await AsyncStorage.getItem("auth_token");
+      if (!token) {
+        Alert.alert("Error", "Not authenticated");
+        return;
+      }
+
+      console.log(`[DELETE FOLDER] Attempting to delete folder: ${folderId}`);
+
+      const res = await fetch(`${AUTH_BASE_URL}/folders?id=${folderId}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
+
+      console.log(`[DELETE FOLDER] Response status: ${res.status}`);
+
+      // Read response text to see what the backend is returning
+      const responseText = await res.text();
+      console.log(`[DELETE FOLDER] Response body: ${responseText}`);
+
+      if (res.ok || res.status === 204) {
+        // Success - folder deleted
+        Alert.alert("Success", "Folder deleted");
+        if (selectedFolder === folderId) {
+          setSelectedFolder(null);
+        }
+        // Update local state immediately
+        setFolders((prevFolders) => prevFolders.filter((f) => f._id !== folderId));
+        // Also update items to remove folderId from games that were in this folder
+        setItems((prevItems) => prevItems.map((item) => (item.folderId === folderId ? { ...item, folderId: undefined } : item)));
+      } else {
+        const errorMsg = responseText || `Failed with status ${res.status}`;
+        console.error(`[DELETE FOLDER] Error: ${errorMsg}`);
+        Alert.alert("Error", `Failed to delete folder: ${errorMsg}`);
+      }
+    } catch (e) {
+      console.error("[DELETE FOLDER] Exception:", e);
+      Alert.alert("Error", `Failed to delete folder: ${e}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Move game to folder
+  const moveGameToFolder = async (gameId: string, folderId: string | null) => {
+    try {
+      setLoading(true);
+      const token = await AsyncStorage.getItem("auth_token");
+      if (!token) {
+        Alert.alert("Error", "Not authenticated");
+        return;
+      }
+
+      const body = { folderId };
+
+      console.log(`[MOVE GAME] Moving game ${gameId} to folder ${folderId}`);
+
+      // Use o mesmo endpoint do backend Next.js
+      const url = `${AUTH_BASE_URL}/collection?id=${gameId}`;
+
+      console.log(`[MOVE GAME] Trying: ${url}`);
+      const res = await fetch(url, {
+        method: "PUT",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(body),
+      });
+
+      const responseText = await res.text();
+      console.log(`[MOVE GAME] Response (${res.status}): ${responseText}`);
+
+      if (res.ok) {
+        Alert.alert("Success", "Game moved to folder");
+        setIsMoveToFolderVisible(false);
+        setGameToMove(null);
+        // Update local state immediately
+        setItems((prevItems) => prevItems.map((item) => (item._id === gameId ? { ...item, folderId: folderId || undefined } : item)));
+      } else {
+        const errorMsg = responseText || `Failed with status ${res.status}`;
+        console.error(`[MOVE GAME] Error: ${errorMsg}`);
+        Alert.alert("Error", `Failed to move game: ${errorMsg}`);
+      }
+    } catch (e) {
+      console.error("[MOVE GAME] Exception:", e);
+      Alert.alert("Error", `Failed to move game: ${e}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Fetch and update daily prices from PriceCharting and update the backend
   const fetchAndUpdateDailyPrices = async (items: Item[], token: string | null) => {
     try {
       setUpdatingPrices(true);
@@ -402,7 +615,12 @@ export default function MyCollectionsPage({ onBack }: { onBack?: () => void }) {
       const token = await AsyncStorage.getItem("auth_token");
       if (!token) throw new Error("Not authenticated");
 
-      const body = { gameTitle: newTitle, platform: newPlatform, userId: uid };
+      const body = {
+        gameTitle: newTitle,
+        platform: newPlatform,
+        userId: uid,
+        folderId: newGameFolderId, // Include folder if selected
+      };
 
       // Try POST to /gameincollections then fallback to /collection
       const postCandidates = [`${AUTH_BASE_URL}/gameincollections`, `${AUTH_BASE_URL}/collection`];
@@ -437,6 +655,7 @@ export default function MyCollectionsPage({ onBack }: { onBack?: () => void }) {
       // refresh
       setNewTitle("");
       setNewPlatform("");
+      setNewGameFolderId(null);
       setIsAdding(false);
       fetchCollections();
     } catch (e) {
@@ -596,20 +815,36 @@ export default function MyCollectionsPage({ onBack }: { onBack?: () => void }) {
         )}
 
         {/* Delete button */}
-        <TouchableOpacity
-          style={styles.deleteButton}
-          onPress={() =>
-            Alert.alert("Delete", `Remove "${item.gameTitle}"?`, [
-              { text: "Cancel", style: "cancel" },
-              { text: "Delete", style: "destructive", onPress: () => removeItem(item._id) },
-            ])
-          }
-        >
-          <Text style={styles.deleteButtonText}>Delete</Text>
-        </TouchableOpacity>
+        <View style={{ flexDirection: "row", gap: 8, marginTop: 8 }}>
+          <TouchableOpacity
+            style={[styles.deleteButton, { flex: 1, backgroundColor: "#8b5cf6" }]}
+            onPress={() => {
+              setGameToMove(item);
+              setIsMoveToFolderVisible(true);
+            }}
+          >
+            <Text style={styles.deleteButtonText}>Move to Folder</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[styles.deleteButton, { flex: 1 }]}
+            onPress={() =>
+              Alert.alert("Delete", `Remove "${item.gameTitle}"?`, [
+                { text: "Cancel", style: "cancel" },
+                { text: "Delete", style: "destructive", onPress: () => removeItem(item._id) },
+              ])
+            }
+          >
+            <Text style={styles.deleteButtonText}>Delete</Text>
+          </TouchableOpacity>
+        </View>
       </View>
     );
   };
+
+  // Filter items by selected folder
+  const filteredItems = selectedFolder ? items.filter((item) => item.folderId === selectedFolder) : items;
+
   return (
     <View style={styles.container}>
       <View style={styles.headerRow}>
@@ -617,35 +852,235 @@ export default function MyCollectionsPage({ onBack }: { onBack?: () => void }) {
           <Text style={styles.back}>&lt; Back</Text>
         </TouchableOpacity>
         <Text style={styles.heading}>My Collections</Text>
-        <TouchableOpacity onPress={manualPriceUpdate} disabled={updatingPrices} style={{ opacity: updatingPrices ? 0.5 : 1 }}>
-          <Text style={styles.back}>{updatingPrices ? "⏳" : "🔄"}</Text>
-        </TouchableOpacity>
+        <View style={{ flexDirection: "row", gap: 8 }}>
+          <TouchableOpacity
+            onPress={() => {
+              setFolderName("");
+              setFolderDescription("");
+              setFolderColor("#a855f7");
+              setIsEditingFolder(false);
+              setCurrentFolderId(null);
+              setIsFolderModalVisible(true);
+            }}
+          >
+            <Text style={styles.back}>📁+</Text>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={manualPriceUpdate} disabled={updatingPrices} style={{ opacity: updatingPrices ? 0.5 : 1 }}>
+            <Text style={styles.back}>{updatingPrices ? "⏳" : "🔄"}</Text>
+          </TouchableOpacity>
+        </View>
       </View>
+
+      {/* Folders horizontal scroll */}
+      {folders.length > 0 && (
+        <View style={{ marginBottom: 12 }}>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ flexDirection: "row" }}>
+            <TouchableOpacity
+              style={[styles.folderChip, { backgroundColor: selectedFolder === null ? "#67e8f9" : "rgba(103, 232, 249, 0.2)" }]}
+              onPress={() => setSelectedFolder(null)}
+            >
+              <Text style={[styles.folderChipText, { color: selectedFolder === null ? "#111827" : "#67e8f9" }]}>All Games ({items.length})</Text>
+            </TouchableOpacity>
+
+            {folders.map((folder) => {
+              const gameCount = items.filter((item) => item.folderId === folder._id).length;
+              return (
+                <TouchableOpacity
+                  key={folder._id}
+                  style={[
+                    styles.folderChip,
+                    { backgroundColor: selectedFolder === folder._id ? folder.color || "#a855f7" : `${folder.color || "#a855f7"}33` },
+                  ]}
+                  onPress={() => setSelectedFolder(folder._id)}
+                  onLongPress={() => {
+                    Alert.alert(folder.name, folder.description || "No description", [
+                      { text: "Cancel", style: "cancel" },
+                      {
+                        text: "Edit",
+                        onPress: () => {
+                          setFolderName(folder.name);
+                          setFolderDescription(folder.description || "");
+                          setFolderColor(folder.color || "#a855f7");
+                          setIsEditingFolder(true);
+                          setCurrentFolderId(folder._id);
+                          setIsFolderModalVisible(true);
+                        },
+                      },
+                      {
+                        text: "Delete",
+                        style: "destructive",
+                        onPress: () => {
+                          Alert.alert("Delete Folder", `Delete "${folder.name}"? Games will not be deleted.`, [
+                            { text: "Cancel", style: "cancel" },
+                            { text: "Delete", style: "destructive", onPress: () => deleteFolder(folder._id) },
+                          ]);
+                        },
+                      },
+                    ]);
+                  }}
+                >
+                  <Text style={[styles.folderChipText, { color: selectedFolder === folder._id ? "#fff" : "#fff" }]}>
+                    📁 {folder.name} ({gameCount})
+                  </Text>
+                </TouchableOpacity>
+              );
+            })}
+          </ScrollView>
+        </View>
+      )}
 
       {loading ? (
         <ActivityIndicator color="#67e8f9" />
-      ) : items.length === 0 ? (
+      ) : filteredItems.length === 0 ? (
         <View style={styles.emptyCentered}>
-          <Text style={{ color: "#67e8f9" }}>No items in your collection yet.</Text>
+          <Text style={{ color: "#67e8f9" }}>{selectedFolder ? "No games in this folder yet." : "No items in your collection yet."}</Text>
         </View>
       ) : (
-        <FlatList data={items} keyExtractor={(i) => i._id ?? i.gameTitle} renderItem={renderItem} />
+        <FlatList data={filteredItems} keyExtractor={(i) => i._id ?? i.gameTitle} renderItem={renderItem} />
       )}
 
+      {/* Add Game Modal */}
       <Modal visible={isAdding} animationType="slide" transparent>
         <View style={styles.modalBackdrop}>
           <View style={styles.modalContent}>
             <Text style={styles.modalTitle}>Add Game</Text>
-            <TextInput placeholder="Title" value={newTitle} onChangeText={setNewTitle} style={styles.input} />
-            <TextInput placeholder="Platform" value={newPlatform} onChangeText={setNewPlatform} style={styles.input} />
+            <TextInput placeholder="Title" placeholderTextColor="#666" value={newTitle} onChangeText={setNewTitle} style={styles.input} />
+            <TextInput placeholder="Platform" placeholderTextColor="#666" value={newPlatform} onChangeText={setNewPlatform} style={styles.input} />
+
+            {/* Folder selection */}
+            {folders.length > 0 && (
+              <View style={{ marginBottom: 12 }}>
+                <Text style={{ color: "#67e8f9", marginBottom: 8, fontSize: 14 }}>Select Folder (optional):</Text>
+                <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                  <TouchableOpacity
+                    style={[styles.folderChip, { backgroundColor: newGameFolderId === null ? "#67e8f9" : "rgba(103, 232, 249, 0.2)" }]}
+                    onPress={() => setNewGameFolderId(null)}
+                  >
+                    <Text style={[styles.folderChipText, { color: newGameFolderId === null ? "#111827" : "#67e8f9" }]}>No Folder</Text>
+                  </TouchableOpacity>
+
+                  {folders.map((folder) => (
+                    <TouchableOpacity
+                      key={folder._id}
+                      style={[
+                        styles.folderChip,
+                        { backgroundColor: newGameFolderId === folder._id ? folder.color || "#a855f7" : `${folder.color || "#a855f7"}33` },
+                      ]}
+                      onPress={() => setNewGameFolderId(folder._id)}
+                    >
+                      <Text style={[styles.folderChipText, { color: "#fff" }]}>📁 {folder.name}</Text>
+                    </TouchableOpacity>
+                  ))}
+                </ScrollView>
+              </View>
+            )}
+
             <View style={{ flexDirection: "row", justifyContent: "flex-end", marginTop: 12 }}>
-              <TouchableOpacity style={styles.modalButton} onPress={() => setIsAdding(false)}>
+              <TouchableOpacity
+                style={styles.modalButton}
+                onPress={() => {
+                  setIsAdding(false);
+                  setNewTitle("");
+                  setNewPlatform("");
+                  setNewGameFolderId(null);
+                }}
+              >
                 <Text style={{ color: "#ccc" }}>Cancel</Text>
               </TouchableOpacity>
               <TouchableOpacity style={[styles.modalButton, { marginLeft: 12 }]} onPress={addItem}>
                 <Text style={{ color: "white" }}>Save</Text>
               </TouchableOpacity>
             </View>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Folder Management Modal */}
+      <Modal visible={isFolderModalVisible} animationType="slide" transparent>
+        <View style={styles.modalBackdrop}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>{isEditingFolder ? "Edit Folder" : "Create Folder"}</Text>
+            <TextInput placeholder="Folder Name (e.g., SNES Games)" value={folderName} onChangeText={setFolderName} style={styles.input} />
+            <TextInput
+              placeholder="Description (optional)"
+              value={folderDescription}
+              onChangeText={setFolderDescription}
+              style={styles.input}
+              multiline
+            />
+            <Text style={{ color: "#67e8f9", marginBottom: 8 }}>Color:</Text>
+            <View style={{ flexDirection: "row", gap: 8, marginBottom: 12 }}>
+              {["#a855f7", "#ef4444", "#10b981", "#3b82f6", "#f59e0b", "#ec4899"].map((color) => (
+                <TouchableOpacity
+                  key={color}
+                  style={{
+                    width: 40,
+                    height: 40,
+                    borderRadius: 20,
+                    backgroundColor: color,
+                    borderWidth: folderColor === color ? 3 : 0,
+                    borderColor: "#fff",
+                  }}
+                  onPress={() => setFolderColor(color)}
+                />
+              ))}
+            </View>
+            <View style={{ flexDirection: "row", justifyContent: "flex-end", marginTop: 12 }}>
+              <TouchableOpacity
+                style={styles.modalButton}
+                onPress={() => {
+                  setIsFolderModalVisible(false);
+                  setIsEditingFolder(false);
+                  setCurrentFolderId(null);
+                }}
+              >
+                <Text style={{ color: "#ccc" }}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={[styles.modalButton, { marginLeft: 12 }]} onPress={saveFolder}>
+                <Text style={{ color: "white" }}>Save</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Move to Folder Modal */}
+      <Modal visible={isMoveToFolderVisible} animationType="slide" transparent>
+        <View style={styles.modalBackdrop}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Move "{gameToMove?.gameTitle}" to:</Text>
+
+            <TouchableOpacity
+              style={[styles.folderOption, { backgroundColor: "rgba(103, 232, 249, 0.2)" }]}
+              onPress={() => {
+                if (gameToMove) moveGameToFolder(gameToMove._id, null);
+              }}
+            >
+              <Text style={{ color: "#67e8f9", fontSize: 16 }}>📂 No Folder (All Games)</Text>
+            </TouchableOpacity>
+
+            {folders.map((folder) => (
+              <TouchableOpacity
+                key={folder._id}
+                style={[styles.folderOption, { backgroundColor: `${folder.color || "#a855f7"}33` }]}
+                onPress={() => {
+                  if (gameToMove) moveGameToFolder(gameToMove._id, folder._id);
+                }}
+              >
+                <Text style={{ color: "#fff", fontSize: 16 }}>📁 {folder.name}</Text>
+                {folder.description && <Text style={{ color: "#ccc", fontSize: 12, marginTop: 4 }}>{folder.description}</Text>}
+              </TouchableOpacity>
+            ))}
+
+            <TouchableOpacity
+              style={[styles.modalButton, { marginTop: 16, alignSelf: "center" }]}
+              onPress={() => {
+                setIsMoveToFolderVisible(false);
+                setGameToMove(null);
+              }}
+            >
+              <Text style={{ color: "#ccc" }}>Cancel</Text>
+            </TouchableOpacity>
           </View>
         </View>
       </Modal>
