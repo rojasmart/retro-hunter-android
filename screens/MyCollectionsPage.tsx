@@ -519,7 +519,7 @@ export default function MyCollectionsPage({ onBack }: { onBack?: () => void }) {
             {item.createdAt ? <Text style={styles.small}>{new Date(item.createdAt).toLocaleDateString()}</Text> : null}
           </View>
           <View style={styles.cardRight}>
-            <Text style={styles.paidLabel}>PAID</Text>
+            <Text style={styles.paidLabel}>My Price:</Text>
             <Text style={styles.paidPrice}>${item.purchasePrice ?? "-"}</Text>
           </View>
         </View>
