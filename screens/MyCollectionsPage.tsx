@@ -852,8 +852,9 @@ export default function MyCollectionsPage({ onBack }: { onBack?: () => void }) {
           <Text style={styles.back}>&lt; Back</Text>
         </TouchableOpacity>
         <Text style={styles.heading}>My Collections</Text>
-        <View style={{ flexDirection: "row", gap: 8 }}>
+        <View style={{ flexDirection: "row", gap: 8, alignItems: "center" }}>
           <TouchableOpacity
+            style={styles.addFolderButton}
             onPress={() => {
               setFolderName("");
               setFolderDescription("");
@@ -863,7 +864,7 @@ export default function MyCollectionsPage({ onBack }: { onBack?: () => void }) {
               setIsFolderModalVisible(true);
             }}
           >
-            <Text style={styles.back}>📁+</Text>
+            <Text style={styles.addFolderButtonText}>+ Folder</Text>
           </TouchableOpacity>
           <TouchableOpacity onPress={manualPriceUpdate} disabled={updatingPrices} style={{ opacity: updatingPrices ? 0.5 : 1 }}>
             <Text style={styles.back}>{updatingPrices ? "⏳" : "🔄"}</Text>
@@ -920,7 +921,7 @@ export default function MyCollectionsPage({ onBack }: { onBack?: () => void }) {
                   }}
                 >
                   <Text style={[styles.folderChipText, { color: selectedFolder === folder._id ? "#fff" : "#fff" }]}>
-                    📁 {folder.name} ({gameCount})
+                    {folder.name} ({gameCount})
                   </Text>
                 </TouchableOpacity>
               );

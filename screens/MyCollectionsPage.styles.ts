@@ -4,9 +4,31 @@ import { StyleSheet } from "react-native";
 
 const styles = StyleSheet.create({
   container: { flex: 1, padding: 12 },
-  headerRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: 12 },
+  headerRow: { 
+    flexDirection: "row", 
+    alignItems: "center", 
+    justifyContent: "space-between", 
+    marginBottom: 12,
+    paddingVertical: 16,
+    backgroundColor: "rgba(31, 41, 55, 0.5)",
+    borderRadius: 8,
+    paddingHorizontal: 12,
+  },
   back: { color: "#67e8f9" },
   heading: { fontSize: 18, fontWeight: "bold", color: "#67e8f9" },
+  addFolderButton: {
+    backgroundColor: "#8b5cf6",
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: "#a78bfa",
+  },
+  addFolderButtonText: {
+    color: "#fff",
+    fontSize: 12,
+    fontWeight: "600",
+  },
   card: { backgroundColor: "rgba(31,41,55,0.8)", borderRadius: 8, padding: 12, marginBottom: 8 },
   cardTopRow: {
     flexDirection: "row",
